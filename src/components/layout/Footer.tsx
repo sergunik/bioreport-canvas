@@ -27,9 +27,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-6 border-t border-border pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {currentYear} BioReport. Open source and self-hosted.
-          </p>
+          
         </div>
       </div>
     </footer>;
