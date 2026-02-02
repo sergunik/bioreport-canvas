@@ -26,9 +26,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-6 border-t border-border pt-6 text-center">
-          
-        </div>
+        
       </div>
     </footer>;
 }
