@@ -1,0 +1,212 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "error": "Error",
+    "success": "Success",
+    "comingSoon": "Coming Soon",
+    "learnMore": "Learn More"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "security": "Security",
+    "logout": "Log out",
+    "login": "Log in",
+    "register": "Get Started"
+  },
+  "landing": {
+    "hero": {
+      "title": "Your Health Data, Your Control",
+      "subtitle": "A privacy-first, self-hosted platform for managing your medical records. No third parties. No cloud dependencies. Complete ownership.",
+      "cta": "Get Started",
+      "login": "Log in"
+    },
+    "features": {
+      "title": "Everything You Need for Health Data Management",
+      "centralized": {
+        "title": "Centralized Storage",
+        "description": "All your medical analyses and documents in one secure place, accessible only by you."
+      },
+      "historical": {
+        "title": "Historical Tracking",
+        "description": "Track your health indicators over time with clear visualizations and trend analysis."
+      },
+      "pdf": {
+        "title": "PDF Extraction",
+        "description": "Automatically extract and structure data from laboratory PDF reports."
+      },
+      "privacy": {
+        "title": "Privacy First",
+        "description": "Self-hosted solution with no data leaving your infrastructure. You own your data."
+      }
+    },
+    "trust": {
+      "title": "Built on Trust",
+      "selfHosted": "Self-Hosted",
+      "openSource": "Open Source",
+      "noThirdParties": "No Third Parties"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to access your health data",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "register": "Create one"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Start managing your health data privately",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 12 characters",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email and we'll send you a reset link",
+      "email": "Email",
+      "submit": "Send reset link",
+      "success": "If an account exists with that email, you'll receive a password reset link.",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "subtitle": "Enter your new password below",
+      "password": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Reset password",
+      "success": "Your password has been reset successfully.",
+      "invalidToken": "This reset link is invalid or has expired.",
+      "backToLogin": "Back to login"
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 12 characters",
+      "passwordsNoMatch": "Passwords do not match"
+    }
+  },
+  "accountSetup": {
+    "title": "Complete Your Profile",
+    "subtitle": "Just a few more details to get you started",
+    "sex": {
+      "label": "Sex",
+      "male": "Male",
+      "female": "Female"
+    },
+    "dateOfBirth": {
+      "label": "Date of Birth",
+      "placeholder": "Select your date of birth"
+    },
+    "nickname": {
+      "label": "Nickname",
+      "placeholder": "What should we call you? (optional)"
+    },
+    "language": {
+      "label": "Language",
+      "placeholder": "Select your language"
+    },
+    "timezone": {
+      "label": "Timezone",
+      "placeholder": "Select your timezone"
+    },
+    "submit": "Complete Setup",
+    "errors": {
+      "sexRequired": "Please select your sex",
+      "dateOfBirthRequired": "Date of birth is required",
+      "languageRequired": "Please select a language",
+      "timezoneRequired": "Please select a timezone"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "emptyState": {
+      "title": "Your health timeline starts here",
+      "description": "Upload your first lab report to begin tracking your health journey."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "uploadReport": {
+        "title": "Upload Your First Report",
+        "description": "Add a lab report to start building your health timeline"
+      },
+      "completeProfile": {
+        "title": "Complete Your Profile",
+        "description": "Add more details to personalize your experience"
+      },
+      "addFamily": {
+        "title": "Add a Family Member",
+        "description": "Manage health data for your loved ones"
+      },
+      "exploreTimeline": {
+        "title": "Explore Your Timeline",
+        "description": "View and analyze your health history"
+      }
+    },
+    "stats": {
+      "totalReports": "Total Reports",
+      "familyMembers": "Family Members",
+      "lastActivity": "Last Activity"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile Settings",
+      "subtitle": "Manage your personal information",
+      "saved": "Profile updated successfully"
+    },
+    "security": {
+      "title": "Security Settings",
+      "subtitle": "Manage your account security",
+      "changePassword": {
+        "title": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "submit": "Update Password",
+        "success": "Password updated successfully"
+      },
+      "sessions": {
+        "title": "Active Sessions",
+        "current": "Current Session",
+        "description": "Manage your active sessions across devices"
+      },
+      "twoFactor": {
+        "title": "Two-Factor Authentication",
+        "description": "Add an extra layer of security to your account"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "subtitle": "Irreversible actions for your account",
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+        "warning": "Warning: This will permanently delete all your data, including all reports, family members, and settings.",
+        "confirmLabel": "Type your email to confirm",
+        "confirmPlaceholder": "your@email.com",
+        "submit": "Delete My Account",
+        "success": "Account deleted successfully"
+      }
+    }
+  }
+}
