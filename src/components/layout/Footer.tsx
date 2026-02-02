@@ -7,12 +7,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           {/* Logo and tagline */}
           <div className="flex flex-col items-center gap-2 md:items-start">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <FileText className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="text-lg font-semibold text-foreground">BioReport</span>
-            </Link>
+            
             <p className="text-sm text-muted-foreground">© 2026 BioReport. Open source and self-hosted.
           </p>
           </div>
