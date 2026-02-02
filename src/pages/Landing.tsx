@@ -77,9 +77,7 @@ export default function Landing() {
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:gap-8">
             {features.map((feature, index) => <Card key={index} className="group border-border/50 transition-all duration-300 hover:border-primary/20 hover:shadow-soft-lg">
                 <CardContent className="flex gap-4 p-6">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/15">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
+                  
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">
                       {t(feature.titleKey)}
