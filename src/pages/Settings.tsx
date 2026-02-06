@@ -77,3 +77,15 @@ export default function Settings() {
     </MainLayout>
   );
 }
+
+export function ProfileSettings() {
+  return <div>Profile settings page coming soon.</div>;
+}
+
+export function SecuritySettings() {
+  return <div>Security settings page coming soon.</div>;
+}
+
+export function DangerZone() {
+  return <div>Danger zone settings page coming soon.</div>;
+}

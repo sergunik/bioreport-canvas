@@ -19,7 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
-import { ProfileSettings, SecuritySettings, DangerZone } from "./pages/settings";
+import { ProfileSettings, SecuritySettings, DangerZone } from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({

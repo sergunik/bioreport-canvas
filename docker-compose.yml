@@ -1,0 +1,13 @@
+services:
+  app:
+    image: oven/bun:1
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: |
+      sh -c "
+        bun install &&
+        bun run build
+      "
+    environment:
+      - NODE_ENV=production
