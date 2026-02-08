@@ -18,6 +18,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
+import DiagnosticReportsList from "./pages/DiagnosticReportsList";
+import NewDiagnosticReport from "./pages/NewDiagnosticReport";
 import Settings from "./pages/Settings";
 import { ProfileSettings, SecuritySettings, DangerZone } from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -51,6 +53,8 @@ const App = () => (
             
             {/* Protected routes */}
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/diagnostic-reports" element={<DiagnosticReportsList />} />
+            <Route path="/diagnostic-reports/new" element={<NewDiagnosticReport />} />
             
             {/* Settings routes */}
             <Route path="/settings" element={<Settings />}>
