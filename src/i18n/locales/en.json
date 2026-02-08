@@ -144,9 +144,13 @@
     },
     "quickActions": {
       "title": "Quick Actions",
-      "uploadReport": {
-        "title": "Upload Your First Report",
-        "description": "Add a lab report to start building your health timeline"
+      "createReport": {
+        "title": "Create Diagnostic Report",
+        "description": "Start a new diagnostic report with observations"
+      },
+      "viewReports": {
+        "title": "View All Reports",
+        "description": "Browse and manage your diagnostic reports"
       },
       "completeProfile": {
         "title": "Complete Your Profile",

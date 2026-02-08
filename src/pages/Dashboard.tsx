@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Upload,
+  FlaskConical,
   User,
   Users,
   Activity,
@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface QuickActionCardProps {
@@ -106,16 +105,8 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { account, hasCompletedSetup } = useAuth();
-  const { toast } = useToast();
 
   const displayName = account?.nickname || 'there';
-
-  const handleUploadClick = () => {
-    toast({
-      title: 'Upload Feature',
-      description: 'Report upload functionality will be available in a future update.',
-    });
-  };
 
   return (
     <MainLayout>
@@ -145,9 +136,9 @@ export default function Dashboard() {
                 <p className="mt-2 max-w-sm text-muted-foreground">
                   {t('dashboard.emptyState.description')}
                 </p>
-                <Button className="mt-6 gap-2" onClick={handleUploadClick}>
-                  <Upload className="h-4 w-4" />
-                  {t('dashboard.quickActions.uploadReport.title')}
+                <Button className="mt-6 gap-2" onClick={() => navigate('/diagnostic-reports/new')}>
+                  <FlaskConical className="h-4 w-4" />
+                  {t('dashboard.quickActions.createReport.title')}
                 </Button>
               </CardContent>
             </Card>
@@ -159,11 +150,17 @@ export default function Dashboard() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <QuickActionCard
-                  title={t('dashboard.quickActions.uploadReport.title')}
-                  description={t('dashboard.quickActions.uploadReport.description')}
-                  icon={<Upload className="h-5 w-5" />}
-                  onClick={handleUploadClick}
+                  title={t('dashboard.quickActions.createReport.title')}
+                  description={t('dashboard.quickActions.createReport.description')}
+                  icon={<FlaskConical className="h-5 w-5" />}
+                  onClick={() => navigate('/diagnostic-reports/new')}
                   primary
+                />
+                <QuickActionCard
+                  title={t('dashboard.quickActions.viewReports.title')}
+                  description={t('dashboard.quickActions.viewReports.description')}
+                  icon={<FileText className="h-5 w-5" />}
+                  onClick={() => navigate('/diagnostic-reports')}
                 />
                 {!hasCompletedSetup && (
                   <QuickActionCard
