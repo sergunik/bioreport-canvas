@@ -4,13 +4,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// i18n
 import "@/i18n";
 
-// Context
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute, GuestRoute, AccountSetupRoute } from "@/components/auth";
 
-// Pages
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -27,7 +25,7 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000,
       retry: 1,
     },
   },
@@ -41,31 +39,31 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Public routes */}
             <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
-            {/* Post-registration */}
-            <Route path="/account-setup" element={<AccountSetup />} />
-            
-            {/* Protected routes */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/diagnostic-reports" element={<DiagnosticReportsList />} />
-            <Route path="/diagnostic-reports/new" element={<NewDiagnosticReport />} />
-            
-            {/* Settings routes */}
-            <Route path="/settings" element={<Settings />}>
-              <Route index element={<Navigate to="/settings/profile" replace />} />
-              <Route path="profile" element={<ProfileSettings />} />
-              <Route path="security" element={<SecuritySettings />} />
-              <Route path="danger" element={<DangerZone />} />
-            </Route>
-            
-            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
+
+            <Route element={<GuestRoute />}>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+            </Route>
+
+            <Route element={<AccountSetupRoute />}>
+              <Route path="/account-setup" element={<AccountSetup />} />
+            </Route>
+
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/diagnostic-reports" element={<DiagnosticReportsList />} />
+              <Route path="/diagnostic-reports/new" element={<NewDiagnosticReport />} />
+              <Route path="/settings" element={<Settings />}>
+                <Route index element={<Navigate to="/settings/profile" replace />} />
+                <Route path="profile" element={<ProfileSettings />} />
+                <Route path="security" element={<SecuritySettings />} />
+                <Route path="danger" element={<DangerZone />} />
+              </Route>
+            </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import type { User, Account, AuthState } from '@/types/api';
-import { authService, accountService, tokenManager, ApiClientError } from '@/api';
-
-// ==================== Types ====================
+import { authService, accountService, ApiClientError } from '@/api';
 
 interface AuthContextValue extends AuthState {
   login: (email: string, password: string) => Promise<void>;
@@ -16,11 +14,8 @@ type AuthAction =
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_USER'; payload: User | null }
   | { type: 'SET_ACCOUNT'; payload: Account | null }
-  | { type: 'SET_AUTHENTICATED'; payload: boolean }
   | { type: 'LOGOUT' }
   | { type: 'INIT_COMPLETE'; payload: { user: User | null; account: Account | null } };
-
-// ==================== Initial State ====================
 
 const initialState: AuthState = {
   user: null,
@@ -29,8 +24,6 @@ const initialState: AuthState = {
   isLoading: true,
   hasCompletedSetup: false,
 };
-
-// ==================== Reducer ====================
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
@@ -48,13 +41,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         account: action.payload,
         hasCompletedSetup: !!action.payload,
       };
-    case 'SET_AUTHENTICATED':
-      return { ...state, isAuthenticated: action.payload };
     case 'LOGOUT':
-      return {
-        ...initialState,
-        isLoading: false,
-      };
+      return { ...initialState, isLoading: false };
     case 'INIT_COMPLETE':
       return {
         ...state,
@@ -69,45 +57,48 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   }
 }
 
-// ==================== Context ====================
-
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-// ==================== Provider ====================
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+async function fetchAccountOrNull(): Promise<Account | null> {
+  try {
+    return await accountService.getAccount();
+  } catch (error) {
+    if (error instanceof ApiClientError && (error.status === 404 || error.status === 409)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Initialize auth state on mount
   useEffect(() => {
     const initAuth = async () => {
-      // Check if we have tokens
-      if (!tokenManager.hasTokens()) {
-        dispatch({ type: 'INIT_COMPLETE', payload: { user: null, account: null } });
-        return;
-      }
-
       try {
-        // Try to get account info
         const account = await accountService.getAccount();
-        
-        // If we get account, user is authenticated
         dispatch({
           type: 'INIT_COMPLETE',
-          payload: {
-            user: { id: account.id, email: '' }, // We don't have email from account endpoint
-            account,
-          },
+          payload: { user: { id: account.id, email: '' }, account },
         });
       } catch (error) {
-        // If error, tokens might be invalid
         if (error instanceof ApiClientError && error.isAuthError()) {
-          tokenManager.clearTokens();
+          dispatch({ type: 'INIT_COMPLETE', payload: { user: null, account: null } });
+          return;
         }
+
+        if (error instanceof ApiClientError && error.status === 404) {
+          dispatch({
+            type: 'INIT_COMPLETE',
+            payload: { user: { id: '', email: '' }, account: null },
+          });
+          return;
+        }
+
         dispatch({ type: 'INIT_COMPLETE', payload: { user: null, account: null } });
       }
     };
@@ -117,22 +108,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = useCallback(async (email: string, password: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    
+
     try {
       await authService.login({ email, password });
-      
-      // Set mock user (in real app, this would come from login response)
-      const user: User = { id: 'user-1', email };
+
+      const user: User = { id: '', email };
       dispatch({ type: 'SET_USER', payload: user });
 
-      // Try to fetch account
-      try {
-        const account = await accountService.getAccount();
-        dispatch({ type: 'SET_ACCOUNT', payload: account });
-      } catch {
-        // Account doesn't exist yet, user needs to complete setup
-        dispatch({ type: 'SET_ACCOUNT', payload: null });
-      }
+      const account = await fetchAccountOrNull();
+      dispatch({ type: 'SET_ACCOUNT', payload: account });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -140,17 +124,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const register = useCallback(async (email: string, password: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    
+
     try {
       const response = await authService.register({ email, password });
-      
-      const user: User = {
-        id: response.user.id,
-        email: response.user.email,
-      };
-      
+      const user: User = { id: response.user.id, email: response.user.email };
       dispatch({ type: 'SET_USER', payload: user });
-      dispatch({ type: 'SET_ACCOUNT', payload: null }); // New user needs setup
+      dispatch({ type: 'SET_ACCOUNT', payload: null });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
@@ -160,10 +139,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await authService.logout();
     } catch {
-      // Even if logout fails on server, clear local state
+      // Clear local state even if server call fails
     }
-    
-    tokenManager.clearTokens();
     dispatch({ type: 'LOGOUT' });
   }, []);
 
@@ -172,7 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const account = await accountService.getAccount();
       dispatch({ type: 'SET_ACCOUNT', payload: account });
     } catch {
-      // Handle error silently
+      // Silently ignore
     }
   }, []);
 
@@ -192,15 +169,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// ==================== Hook ====================
-
 export function useAuth() {
   const context = useContext(AuthContext);
-  
+
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 }
 
