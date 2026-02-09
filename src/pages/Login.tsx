@@ -32,7 +32,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export default function Login() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login, hasCompletedSetup } = useAuth();
+  const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -50,13 +50,7 @@ export default function Login() {
 
     try {
       await login(data.email, data.password);
-
-      // Redirect based on account setup status
-      if (hasCompletedSetup) {
-        navigate('/dashboard');
-      } else {
-        navigate('/account-setup');
-      }
+      navigate('/dashboard');
     } catch (error) {
       if (error instanceof ApiClientError) {
         if (error.status === 401) {
