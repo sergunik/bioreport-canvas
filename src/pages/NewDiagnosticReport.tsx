@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -18,32 +17,46 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { diagnosticReportService, observationService, ApiClientError } from '@/api';
 
-interface Observation {
+interface ObservationRow {
   id: string;
   name: string;
   value: string;
   unit: string;
-  referenceRange: string;
+  referenceRangeMin: string;
+  referenceRangeMax: string;
+  referenceUnit: string;
 }
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9);
 }
 
+const initialObservation: ObservationRow = {
+  id: generateId(),
+  name: '',
+  value: '',
+  unit: '',
+  referenceRangeMin: '',
+  referenceRangeMax: '',
+  referenceUnit: '',
+};
+
 export default function NewDiagnosticReport() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
-  const [observations, setObservations] = useState<Observation[]>([
-    { id: generateId(), name: '', value: '', unit: '', referenceRange: '' },
+  const [observations, setObservations] = useState<ObservationRow[]>([
+    { ...initialObservation, id: generateId() },
   ]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addObservation = () => {
     setObservations((prev) => [
       ...prev,
-      { id: generateId(), name: '', value: '', unit: '', referenceRange: '' },
+      { ...initialObservation, id: generateId() },
     ]);
   };
 
@@ -52,13 +65,17 @@ export default function NewDiagnosticReport() {
     setObservations((prev) => prev.filter((o) => o.id !== id));
   };
 
-  const updateObservation = (id: string, field: keyof Observation, value: string) => {
+  const updateObservation = (
+    id: string,
+    field: keyof ObservationRow,
+    value: string
+  ) => {
     setObservations((prev) =>
       prev.map((o) => (o.id === id ? { ...o, [field]: value } : o))
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -70,11 +87,10 @@ export default function NewDiagnosticReport() {
       return;
     }
 
-    const hasValidObservation = observations.some(
+    const validObservations = observations.filter(
       (o) => o.name.trim() && o.value.trim()
     );
-
-    if (!hasValidObservation) {
+    if (validObservations.length === 0) {
       toast({
         title: 'Validation Error',
         description: 'Please add at least one observation with a name and value.',
@@ -83,12 +99,56 @@ export default function NewDiagnosticReport() {
       return;
     }
 
-    // For now, just show success and navigate back
-    toast({
-      title: 'Report Created',
-      description: 'Your diagnostic report has been saved.',
-    });
-    navigate('/diagnostic-reports');
+    if (validObservations.some((o) => Number.isNaN(Number(o.value)))) {
+      toast({
+        title: 'Validation Error',
+        description: 'Observation value must be a valid number.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const report = await diagnosticReportService.create({
+        title: title.trim() || null,
+        notes: notes.trim() || null,
+      });
+
+      for (const obs of validObservations) {
+        const numValue = Number(obs.value);
+        const min = obs.referenceRangeMin.trim()
+          ? Number(obs.referenceRangeMin)
+          : null;
+        const max = obs.referenceRangeMax.trim()
+          ? Number(obs.referenceRangeMax)
+          : null;
+        await observationService.create(report.id, {
+          biomarker_name: obs.name.trim(),
+          value: numValue,
+          unit: obs.unit.trim() || '',
+          reference_range_min: min !== null && !Number.isNaN(min) ? min : null,
+          reference_range_max: max !== null && !Number.isNaN(max) ? max : null,
+          reference_unit: obs.referenceUnit.trim() || null,
+        });
+      }
+
+      toast({
+        title: 'Report Created',
+        description: 'Your diagnostic report has been saved.',
+      });
+      navigate(`/diagnostic-reports/${report.id}`);
+    } catch (err) {
+      const message =
+        err instanceof ApiClientError ? err.getFirstError() : 'An error occurred';
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,6 +159,7 @@ export default function NewDiagnosticReport() {
             variant="ghost"
             className="mb-4 gap-2 text-muted-foreground"
             onClick={() => navigate('/diagnostic-reports')}
+            disabled={isSubmitting}
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Reports
@@ -110,7 +171,6 @@ export default function NewDiagnosticReport() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Report Details */}
           <Card>
             <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
@@ -135,7 +195,6 @@ export default function NewDiagnosticReport() {
             </CardContent>
           </Card>
 
-          {/* Observations Table */}
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-4">
@@ -145,7 +204,13 @@ export default function NewDiagnosticReport() {
                     Add biomarker results from your report
                   </p>
                 </div>
-                <Button type="button" variant="outline" className="gap-2" onClick={addObservation}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={addObservation}
+                  disabled={isSubmitting}
+                >
                   <Plus className="h-4 w-4" />
                   Add Row
                 </Button>
@@ -158,7 +223,9 @@ export default function NewDiagnosticReport() {
                       <TableHead className="min-w-[180px]">Biomarker Name</TableHead>
                       <TableHead className="min-w-[100px]">Value</TableHead>
                       <TableHead className="min-w-[100px]">Unit</TableHead>
-                      <TableHead className="min-w-[140px]">Reference Range</TableHead>
+                      <TableHead className="min-w-[100px]">Ref. Min</TableHead>
+                      <TableHead className="min-w-[100px]">Ref. Max</TableHead>
+                      <TableHead className="min-w-[80px]">Ref. Unit</TableHead>
                       <TableHead className="w-[50px]" />
                     </TableRow>
                   </TableHeader>
@@ -169,29 +236,65 @@ export default function NewDiagnosticReport() {
                           <Input
                             placeholder="e.g., Hemoglobin"
                             value={obs.name}
-                            onChange={(e) => updateObservation(obs.id, 'name', e.target.value)}
+                            onChange={(e) =>
+                              updateObservation(obs.id, 'name', e.target.value)
+                            }
                           />
                         </TableCell>
                         <TableCell>
                           <Input
                             placeholder="e.g., 14.5"
                             value={obs.value}
-                            onChange={(e) => updateObservation(obs.id, 'value', e.target.value)}
+                            onChange={(e) =>
+                              updateObservation(obs.id, 'value', e.target.value)
+                            }
                           />
                         </TableCell>
                         <TableCell>
                           <Input
                             placeholder="e.g., g/dL"
                             value={obs.unit}
-                            onChange={(e) => updateObservation(obs.id, 'unit', e.target.value)}
+                            onChange={(e) =>
+                              updateObservation(obs.id, 'unit', e.target.value)
+                            }
                           />
                         </TableCell>
                         <TableCell>
                           <Input
-                            placeholder="e.g., 12.0–17.5"
-                            value={obs.referenceRange}
+                            placeholder="e.g., 12"
+                            value={obs.referenceRangeMin}
                             onChange={(e) =>
-                              updateObservation(obs.id, 'referenceRange', e.target.value)
+                              updateObservation(
+                                obs.id,
+                                'referenceRangeMin',
+                                e.target.value
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="e.g., 17.5"
+                            value={obs.referenceRangeMax}
+                            onChange={(e) =>
+                              updateObservation(
+                                obs.id,
+                                'referenceRangeMax',
+                                e.target.value
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            placeholder="e.g., g/dL"
+                            value={obs.referenceUnit}
+                            onChange={(e) =>
+                              updateObservation(
+                                obs.id,
+                                'referenceUnit',
+                                e.target.value
+                              )
                             }
                           />
                         </TableCell>
@@ -201,7 +304,7 @@ export default function NewDiagnosticReport() {
                             variant="ghost"
                             size="icon"
                             onClick={() => removeObservation(obs.id)}
-                            disabled={observations.length <= 1}
+                            disabled={observations.length <= 1 || isSubmitting}
                             className="text-muted-foreground hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -215,16 +318,25 @@ export default function NewDiagnosticReport() {
             </CardContent>
           </Card>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => navigate('/diagnostic-reports')}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">Save Report</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Report'
+              )}
+            </Button>
           </div>
         </form>
       </PageContainer>
