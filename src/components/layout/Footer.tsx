@@ -8,7 +8,7 @@ export function Footer() {
           {/* Logo and tagline */}
           <div className="flex flex-col items-center gap-2 md:items-start">
             
-            <p className="text-sm text-muted-foreground">© 2026 BioReport. Open source and self-hosted.
+            <p className="text-sm text-muted-foreground">© 2026 BioReport. Open source and self-hosted.
           </p>
           </div>
 

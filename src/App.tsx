@@ -18,6 +18,7 @@ import AccountSetup from "./pages/AccountSetup";
 import Dashboard from "./pages/Dashboard";
 import DiagnosticReportsList from "./pages/DiagnosticReportsList";
 import NewDiagnosticReport from "./pages/NewDiagnosticReport";
+import DiagnosticReportDetail from "./pages/DiagnosticReportDetail";
 import Settings from "./pages/Settings";
 import { ProfileSettings, SecuritySettings, DangerZone } from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/diagnostic-reports" element={<DiagnosticReportsList />} />
               <Route path="/diagnostic-reports/new" element={<NewDiagnosticReport />} />
+              <Route path="/diagnostic-reports/:id" element={<DiagnosticReportDetail />} />
               <Route path="/settings" element={<Settings />}>
                 <Route index element={<Navigate to="/settings/profile" replace />} />
                 <Route path="profile" element={<ProfileSettings />} />

@@ -98,6 +98,49 @@ export interface HealthCheckResponse {
   timestamp: string;
 }
 
+// ==================== Diagnostic Report Types ====================
+
+export interface ObservationResource {
+  id: number;
+  biomarker_name: string;
+  biomarker_code: string | null;
+  value: number;
+  unit: string;
+  reference_range_min: number | null;
+  reference_range_max: number | null;
+  reference_unit: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DiagnosticReportResource {
+  id: number;
+  title?: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  observations: ObservationResource[];
+}
+
+export interface DiagnosticReportListResponse {
+  data: DiagnosticReportResource[];
+}
+
+export interface StoreDiagnosticReportRequest {
+  title?: string | null;
+  notes?: string | null;
+}
+
+export interface StoreObservationRequest {
+  biomarker_name: string;
+  biomarker_code?: string | null;
+  value: number;
+  unit: string;
+  reference_range_min?: number | null;
+  reference_range_max?: number | null;
+  reference_unit?: string | null;
+}
+
 // ==================== Error Types ====================
 
 export interface ValidationError {
