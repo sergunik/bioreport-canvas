@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { FlaskConical, Plus, FileText, ChevronRight } from 'lucide-react';
 
@@ -69,11 +69,12 @@ export default function DiagnosticReportsList() {
               const displayTitle =
                 report.title ?? report.notes ?? `Report #${report.id}`;
               return (
-                <Card
+                <Link
                   key={report.id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50"
-                  onClick={() => navigate(`/diagnostic-reports/${report.id}`)}
+                  to={`/diagnostic-reports/${report.id}`}
+                  className="block"
                 >
+                  <Card className="cursor-pointer transition-colors hover:bg-muted/50">
                   <CardContent className="flex items-center justify-between py-4">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-foreground truncate">
@@ -91,7 +92,8 @@ export default function DiagnosticReportsList() {
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
                   </CardContent>
-                </Card>
+                  </Card>
+                </Link>
               );
             })}
           </div>
