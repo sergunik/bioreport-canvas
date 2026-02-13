@@ -158,6 +158,42 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
+// ==================== Profile Types (/me) ====================
+
+export interface Profile {
+  id: string;
+  email: string;
+  nickname: string | null;
+  date_of_birth: string;
+  sex: Sex;
+  language: string | null;
+  timezone: string | null;
+}
+
+export interface UpdateProfileRequest {
+  nickname?: string | null;
+  language?: string;
+  timezone?: string;
+  sex?: string;
+  date_of_birth?: string;
+}
+
+export interface UpdateProfileResponse {
+  status: 'updated';
+}
+
+// ==================== Security Types (/me/security) ====================
+
+export interface UpdateSecurityRequest {
+  current_password: string;
+  email?: string;
+  password?: string;
+}
+
+export interface UpdateSecurityResponse {
+  status: 'updated';
+}
+
 // ==================== User State ====================
 
 export interface User {

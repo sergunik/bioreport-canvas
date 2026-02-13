@@ -60,7 +60,7 @@ describe('apiClient', () => {
       .mockResolvedValueOnce(unauthorizedResponse)
       .mockResolvedValueOnce(refreshFailResponse);
 
-    const error = await apiClient('/protected').catch(e => e);
+    const error = await apiClient('/protected').catch(e => e) as ApiClientError;
     expect(error).toBeInstanceOf(ApiClientError);
     expect(error.status).toBe(401);
   });
