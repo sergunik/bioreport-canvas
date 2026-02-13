@@ -176,27 +176,28 @@
     "profile": {
       "title": "Profile Settings",
       "subtitle": "Manage your personal information",
+      "email": "Email",
       "saved": "Profile updated successfully"
     },
     "security": {
       "title": "Security Settings",
       "subtitle": "Manage your account security",
+      "changeEmail": {
+        "title": "Change Email",
+        "description": "Update the email address associated with your account",
+        "newEmail": "New Email Address",
+        "currentPassword": "Current Password",
+        "submit": "Update Email",
+        "success": "Email updated successfully"
+      },
       "changePassword": {
         "title": "Change Password",
+        "description": "Update your password to keep your account secure",
         "currentPassword": "Current Password",
         "newPassword": "New Password",
         "confirmPassword": "Confirm New Password",
         "submit": "Update Password",
         "success": "Password updated successfully"
-      },
-      "sessions": {
-        "title": "Active Sessions",
-        "current": "Current Session",
-        "description": "Manage your active sessions across devices"
-      },
-      "twoFactor": {
-        "title": "Two-Factor Authentication",
-        "description": "Add an extra layer of security to your account"
       }
     },
     "dangerZone": {
@@ -206,10 +207,12 @@
         "title": "Delete Account",
         "description": "Permanently delete your account and all associated data. This action cannot be undone.",
         "warning": "Warning: This will permanently delete all your data, including all reports, family members, and settings.",
-        "confirmLabel": "Type your email to confirm",
-        "confirmPlaceholder": "your@email.com",
+        "confirmLabel": "Enter your password to confirm",
+        "confirmPlaceholder": "Your current password",
         "submit": "Delete My Account",
-        "success": "Account deleted successfully"
+        "success": "Account deleted successfully",
+        "confirmTitle": "Are you absolutely sure?",
+        "confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers."
       }
     }
   }

@@ -28,38 +28,34 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { accountService, ApiClientError } from '@/api';
+import { profileService, ApiClientError } from '@/api';
+
+const deleteSchema = z.object({
+  password: z.string().min(1, 'Password is required'),
+});
+
+type DeleteFormData = z.infer<typeof deleteSchema>;
 
 export default function DangerZone() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
-  const deleteSchema = z.object({
-    confirmEmail: z
-      .string()
-      .refine((val) => val === user?.email, 'Email does not match'),
-  });
-
-  type DeleteFormData = z.infer<typeof deleteSchema>;
+  const [pendingPassword, setPendingPassword] = useState('');
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
-    watch,
   } = useForm<DeleteFormData>({
     resolver: zodResolver(deleteSchema),
     mode: 'onChange',
   });
 
-  const confirmEmailValue = watch('confirmEmail');
-  const isEmailMatch = confirmEmailValue === user?.email;
-
-  const onSubmit = async () => {
+  const onSubmit = (data: DeleteFormData) => {
+    setPendingPassword(data.password);
     setShowConfirmDialog(true);
   };
 
@@ -68,8 +64,8 @@ export default function DangerZone() {
     setShowConfirmDialog(false);
 
     try {
-      await accountService.deleteAccount();
-      
+      await profileService.deleteUser(pendingPassword);
+
       toast({
         title: t('common.success'),
         description: t('settings.dangerZone.deleteAccount.success'),
@@ -79,11 +75,19 @@ export default function DangerZone() {
       navigate('/');
     } catch (error) {
       if (error instanceof ApiClientError) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: error.message,
-        });
+        if (error.isValidationError()) {
+          toast({
+            variant: 'destructive',
+            title: t('common.error'),
+            description: error.getFirstError(),
+          });
+        } else {
+          toast({
+            variant: 'destructive',
+            title: t('common.error'),
+            description: error.message,
+          });
+        }
       } else {
         toast({
           variant: 'destructive',
@@ -93,6 +97,7 @@ export default function DangerZone() {
       }
     } finally {
       setIsLoading(false);
+      setPendingPassword('');
     }
   };
 
@@ -124,24 +129,20 @@ export default function DangerZone() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmEmail">
+              <Label htmlFor="password">
                 {t('settings.dangerZone.deleteAccount.confirmLabel')}
               </Label>
               <Input
-                id="confirmEmail"
-                type="email"
+                id="password"
+                type="password"
+                autoComplete="current-password"
                 placeholder={t('settings.dangerZone.deleteAccount.confirmPlaceholder')}
-                {...register('confirmEmail')}
-                aria-invalid={!!errors.confirmEmail}
+                {...register('password')}
+                aria-invalid={!!errors.password}
               />
-              {user?.email && (
-                <p className="text-xs text-muted-foreground">
-                  Type <span className="font-medium">{user.email}</span> to confirm
-                </p>
-              )}
-              {errors.confirmEmail && (
+              {errors.password && (
                 <p className="text-sm text-destructive">
-                  {errors.confirmEmail.message}
+                  {errors.password.message}
                 </p>
               )}
             </div>
@@ -149,7 +150,7 @@ export default function DangerZone() {
             <Button
               type="submit"
               variant="destructive"
-              disabled={!isEmailMatch || isLoading}
+              disabled={!isValid || isLoading}
               className="w-full sm:w-auto"
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -163,19 +164,20 @@ export default function DangerZone() {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('settings.dangerZone.deleteAccount.confirmTitle')}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove all your data from our servers.
+              {t('settings.dangerZone.deleteAccount.confirmDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteAccount}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete Account
+              {t('settings.dangerZone.deleteAccount.submit')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

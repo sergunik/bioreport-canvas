@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,9 +23,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { accountService, ApiClientError } from '@/api';
+import { profileService, ApiClientError } from '@/api';
 import { LANGUAGE_OPTIONS, TIMEZONE_OPTIONS } from '@/types';
+import type { Profile } from '@/types/api';
 
 const profileSchema = z.object({
   nickname: z.string().max(255).optional().nullable(),
@@ -37,9 +37,10 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function ProfileSettings() {
   const { t } = useTranslation();
-  const { account, refreshAccount } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
   const {
     register,
@@ -47,27 +48,60 @@ export default function ProfileSettings() {
     handleSubmit,
     formState: { errors, isDirty },
     setError,
+    reset,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      nickname: account?.nickname || '',
-      language: account?.language || 'en',
-      timezone: account?.timezone || 'UTC',
+      nickname: '',
+      language: 'en',
+      timezone: 'UTC',
     },
   });
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const data = await profileService.getProfile();
+        setProfile(data);
+        reset({
+          nickname: data.nickname || '',
+          language: data.language || 'en',
+          timezone: data.timezone || 'UTC',
+        });
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          toast({
+            variant: 'destructive',
+            title: t('common.error'),
+            description: error.message,
+          });
+        }
+      } finally {
+        setIsFetching(false);
+      }
+    };
+
+    fetchProfile();
+  }, [reset, toast, t]);
 
   const onSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
 
     try {
-      await accountService.updateAccount({
+      await profileService.updateProfile({
         nickname: data.nickname || null,
         language: data.language,
         timezone: data.timezone,
       });
 
-      await refreshAccount();
-      
+      const updatedProfile = await profileService.getProfile();
+      setProfile(updatedProfile);
+      reset({
+        nickname: updatedProfile.nickname || '',
+        language: updatedProfile.language || 'en',
+        timezone: updatedProfile.timezone || 'UTC',
+      });
+
       toast({
         title: t('common.success'),
         description: t('settings.profile.saved'),
@@ -100,6 +134,14 @@ export default function ProfileSettings() {
     }
   };
 
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -113,21 +155,36 @@ export default function ProfileSettings() {
             {/* Read-only fields */}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-muted-foreground">Sex</Label>
+                <Label className="text-muted-foreground">
+                  {t('settings.profile.email')}
+                </Label>
                 <Input
-                  value={account?.sex === 'male' ? 'Male' : 'Female'}
+                  value={profile?.email || ''}
                   disabled
                   className="bg-muted"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-muted-foreground">Date of Birth</Label>
+                <Label className="text-muted-foreground">
+                  {t('accountSetup.sex.label')}
+                </Label>
                 <Input
-                  value={account?.date_of_birth || ''}
+                  value={profile?.sex === 'male' ? t('accountSetup.sex.male') : t('accountSetup.sex.female')}
                   disabled
                   className="bg-muted"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">
+                {t('accountSetup.dateOfBirth.label')}
+              </Label>
+              <Input
+                value={profile?.date_of_birth || ''}
+                disabled
+                className="bg-muted"
+              />
             </div>
 
             {/* Editable fields */}
