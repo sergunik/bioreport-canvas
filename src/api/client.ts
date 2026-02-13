@@ -153,8 +153,14 @@ export const api = {
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  delete: <T>(endpoint: string, options?: RequestInit) =>
-    apiClient<T>(endpoint, { ...options, method: 'DELETE' }),
+  delete: <T>(endpoint: string, options?: RequestInit & { data?: unknown }) => {
+    const { data, ...rest } = options ?? {};
+    return apiClient<T>(endpoint, {
+      ...rest,
+      method: 'DELETE',
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    });
+  },
 };
 
 export default api;

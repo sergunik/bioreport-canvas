@@ -21,10 +21,12 @@ export const profileService = {
   },
 
   /**
-   * Delete the current user (DELETE /me?password=...)
+   * Delete the current user (DELETE /me with password in body)
    */
   deleteUser: async (password: string): Promise<void> => {
-    return api.delete<void>(`/me?password=${encodeURIComponent(password)}`);
+    return api.delete<void>('/me', {
+      data: { password },
+    });
   },
 };
 
