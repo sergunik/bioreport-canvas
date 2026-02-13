@@ -28,7 +28,6 @@ export default function Settings() {
   const { t } = useTranslation();
   const location = useLocation();
 
-  // Redirect to profile if on base settings path
   const isBasePath = location.pathname === '/settings';
 
   return (
@@ -41,7 +40,6 @@ export default function Settings() {
         </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">
-          {/* Sidebar Navigation */}
           <nav className="w-full shrink-0 lg:w-64">
             <div className="flex flex-row gap-2 overflow-x-auto lg:flex-col lg:gap-1">
               {settingsNav.map((item) => (
@@ -68,7 +66,6 @@ export default function Settings() {
             </div>
           </nav>
 
-          {/* Content Area */}
           <div className="flex-1">
             <Outlet />
           </div>
@@ -76,16 +73,4 @@ export default function Settings() {
       </PageContainer>
     </MainLayout>
   );
-}
-
-export function ProfileSettings() {
-  return <div>Profile settings page coming soon.</div>;
-}
-
-export function SecuritySettings() {
-  return <div>Security settings page coming soon.</div>;
-}
-
-export function DangerZone() {
-  return <div>Danger zone settings page coming soon.</div>;
 }
