@@ -72,6 +72,21 @@ describe('DangerZoneSection', () => {
     vi.clearAllMocks();
   });
 
+  const openConfirmDialog = async (password = 'MyPassword123!') => {
+    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
+    fireEvent.change(passwordInput, { target: { value: password } });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i })).not.toBeDisabled();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
+    });
+  };
+
   it('renders the danger zone section', () => {
     render(<DangerZoneSection />);
     expect(screen.getByText('settings.dangerZone.deleteAccount.title')).toBeInTheDocument();
@@ -111,32 +126,14 @@ describe('DangerZoneSection', () => {
 
   it('shows confirmation dialog when form is submitted', async () => {
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     expect(screen.getByText('settings.dangerZone.deleteAccount.confirmDescription')).toBeInTheDocument();
   });
 
   it('closes confirmation dialog when cancel is clicked', async () => {
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const cancelButton = screen.getByText('common.cancel');
     fireEvent.click(cancelButton);
@@ -151,16 +148,7 @@ describe('DangerZoneSection', () => {
     mockLogout.mockResolvedValue(undefined);
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -185,16 +173,7 @@ describe('DangerZoneSection', () => {
     );
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'WrongPassword' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog('WrongPassword');
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -216,16 +195,7 @@ describe('DangerZoneSection', () => {
     mockDeleteUser.mockRejectedValue(new ApiClientError('Server error'));
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -246,16 +216,7 @@ describe('DangerZoneSection', () => {
     mockDeleteUser.mockRejectedValue(new Error('Unknown error'));
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -273,16 +234,7 @@ describe('DangerZoneSection', () => {
     mockDeleteUser.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -311,16 +263,7 @@ describe('DangerZoneSection', () => {
     mockLogout.mockResolvedValue(undefined);
 
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
+    await openConfirmDialog();
 
     const confirmButton = screen.getAllByText('settings.dangerZone.deleteAccount.submit')[1];
     fireEvent.click(confirmButton);
@@ -332,18 +275,9 @@ describe('DangerZoneSection', () => {
 
   it('does not call API until confirmation dialog is confirmed', async () => {
     render(<DangerZoneSection />);
-
-    const passwordInput = screen.getByLabelText('settings.dangerZone.deleteAccount.confirmLabel');
-    fireEvent.change(passwordInput, { target: { value: 'MyPassword123!' } });
-
-    const submitButton = screen.getByRole('button', { name: /settings.dangerZone.deleteAccount.submit/i });
-    fireEvent.click(submitButton);
+    await openConfirmDialog();
 
     expect(mockDeleteUser).not.toHaveBeenCalled();
-
-    await waitFor(() => {
-      expect(screen.getByText('settings.dangerZone.deleteAccount.confirmTitle')).toBeInTheDocument();
-    });
 
     expect(mockDeleteUser).not.toHaveBeenCalled();
   });

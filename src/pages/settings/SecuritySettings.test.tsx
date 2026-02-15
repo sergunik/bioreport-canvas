@@ -74,10 +74,13 @@ describe('SecuritySettingsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders both change email and change password sections', () => {
+  it('renders both change email and change password sections', async () => {
     mockGetProfile.mockResolvedValue(mockProfile);
     render(<SecuritySettingsPage />);
 
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('user@example.com')).toBeInTheDocument();
+    });
     expect(screen.getByText('settings.security.changeEmail.title')).toBeInTheDocument();
     expect(screen.getByText('settings.security.changePassword.title')).toBeInTheDocument();
   });
@@ -129,8 +132,9 @@ describe('SecuritySettingsPage', () => {
       });
 
       const emailInput = screen.getByDisplayValue('user@example.com');
-      fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-      fireEvent.blur(emailInput);
+      fireEvent.change(emailInput, { target: { value: 'a@b' } });
+      const submitButtons = screen.getAllByRole('button', { name: /settings.security.changeEmail.submit/i });
+      fireEvent.click(submitButtons[0]);
 
       await waitFor(() => {
         expect(screen.getByText('Please enter a valid email')).toBeInTheDocument();
@@ -281,7 +285,8 @@ describe('SecuritySettingsPage', () => {
 
       const newPasswordInput = screen.getByLabelText('settings.security.changePassword.newPassword');
       fireEvent.change(newPasswordInput, { target: { value: 'short' } });
-      fireEvent.blur(newPasswordInput);
+      const submitButtons = screen.getAllByRole('button', { name: /settings.security.changePassword.submit/i });
+      fireEvent.click(submitButtons[0]);
 
       await waitFor(() => {
         expect(screen.getByText('Password must be at least 12 characters')).toBeInTheDocument();
@@ -300,7 +305,8 @@ describe('SecuritySettingsPage', () => {
 
       fireEvent.change(newPasswordInput, { target: { value: 'NewPassword123!!' } });
       fireEvent.change(confirmPasswordInput, { target: { value: 'DifferentPassword123!!' } });
-      fireEvent.blur(confirmPasswordInput);
+      const submitButtons = screen.getAllByRole('button', { name: /settings.security.changePassword.submit/i });
+      fireEvent.click(submitButtons[0]);
 
       await waitFor(() => {
         expect(screen.getByText("Passwords don't match")).toBeInTheDocument();
@@ -315,7 +321,8 @@ describe('SecuritySettingsPage', () => {
       });
 
       const currentPasswordInput = screen.getByLabelText('settings.security.changePassword.currentPassword');
-      fireEvent.blur(currentPasswordInput);
+      const submitButtons = screen.getAllByRole('button', { name: /settings.security.changePassword.submit/i });
+      fireEvent.click(submitButtons[0]);
 
       await waitFor(() => {
         expect(screen.getByText('Current password is required')).toBeInTheDocument();

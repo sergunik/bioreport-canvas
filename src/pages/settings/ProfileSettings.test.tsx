@@ -6,10 +6,11 @@ import type { Profile } from '@/types/api';
 const mockToast = vi.fn();
 const mockGetProfile = vi.fn();
 const mockUpdateProfile = vi.fn();
+const mockT = (key: string) => key;
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: mockT,
   }),
 }));
 
@@ -77,10 +78,21 @@ describe('ProfileSettingsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('shows loading spinner while fetching profile', () => {
-    mockGetProfile.mockImplementation(() => new Promise(() => {}));
-    render(<ProfileSettingsPage />);
-    expect(screen.getByRole('status')).toBeInTheDocument();
+  it('shows loading spinner while fetching profile', async () => {
+    let resolveProfile: ((value: Profile) => void) | undefined;
+    mockGetProfile.mockImplementation(
+      () =>
+        new Promise<Profile>((resolve) => {
+          resolveProfile = resolve;
+        })
+    );
+    const { container, unmount } = render(<ProfileSettingsPage />);
+    expect(container.querySelector('svg.animate-spin')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockGetProfile).toHaveBeenCalled();
+    });
+    resolveProfile?.(mockProfile);
+    unmount();
   });
 
   it('loads and displays profile data', async () => {
@@ -182,7 +194,7 @@ describe('ProfileSettingsPage', () => {
     });
 
     const nicknameInput = screen.getByDisplayValue('TestUser');
-    fireEvent.change(nicknameInput, { target: { value: 'A'.repeat(300) } });
+    fireEvent.change(nicknameInput, { target: { value: 'TakenNickname' } });
 
     const saveButton = screen.getByRole('button', { name: /common.save/i });
     fireEvent.click(saveButton);
@@ -286,7 +298,9 @@ describe('ProfileSettingsPage', () => {
     const saveButton = screen.getByRole('button', { name: /common.save/i });
     fireEvent.click(saveButton);
 
-    expect(saveButton).toBeDisabled();
+    await waitFor(() => {
+      expect(saveButton).toBeDisabled();
+    });
   });
 
   it('handles profile fetch error on mount', async () => {
@@ -328,6 +342,9 @@ describe('ProfileSettingsPage', () => {
     fireEvent.change(nicknameInput, { target: { value: '' } });
 
     const saveButton = screen.getByRole('button', { name: /common.save/i });
+    await waitFor(() => {
+      expect(saveButton).not.toBeDisabled();
+    });
     fireEvent.click(saveButton);
 
     await waitFor(() => {

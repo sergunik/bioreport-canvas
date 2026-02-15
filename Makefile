@@ -6,7 +6,7 @@ exec:
 	$(COMPOSE) exec app sh
 
 build:
-	$(COMPOSE) exec app bun install && bun run build
+	$(COMPOSE) exec app bun install && $(COMPOSE) exec app bun run build
 
 test:
 	$(COMPOSE) exec app bun run test

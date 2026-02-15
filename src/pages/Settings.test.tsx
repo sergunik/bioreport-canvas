@@ -29,7 +29,7 @@ function renderSettings(initialPath = '/settings') {
         <Route path="/settings" element={<Settings />}>
           <Route path="profile" element={<div>Profile Settings</div>} />
           <Route path="security" element={<div>Security Settings</div>} />
-          <Route path="danger" element={<div>Danger Zone</div>} />
+          <Route path="danger" element={<div>Danger Zone Content</div>} />
         </Route>
       </Routes>
     </MemoryRouter>
@@ -44,9 +44,9 @@ describe('Settings', () => {
 
   it('renders all navigation links', () => {
     renderSettings();
-    expect(screen.getByText('Profile')).toBeInTheDocument();
-    expect(screen.getByText('Security')).toBeInTheDocument();
-    expect(screen.getByText('Danger Zone')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Danger Zone' })).toBeInTheDocument();
   });
 
   it('renders profile settings when navigating to /settings/profile', () => {
@@ -61,7 +61,7 @@ describe('Settings', () => {
 
   it('renders danger zone when navigating to /settings/danger', () => {
     renderSettings('/settings/danger');
-    expect(screen.getByText('Danger Zone')).toBeInTheDocument();
+    expect(screen.getByText('Danger Zone Content')).toBeInTheDocument();
   });
 
   it('applies active styling to profile link when on profile page', () => {
@@ -78,14 +78,14 @@ describe('Settings', () => {
 
   it('applies danger styling to danger zone link', () => {
     renderSettings();
-    const dangerLink = screen.getByText('Danger Zone').closest('a');
+    const dangerLink = screen.getByRole('link', { name: 'Danger Zone' });
     expect(dangerLink?.className).toContain('hover:bg-destructive/10');
     expect(dangerLink?.className).toContain('hover:text-destructive');
   });
 
   it('applies active danger styling when on danger zone page', () => {
     renderSettings('/settings/danger');
-    const dangerLink = screen.getByText('Danger Zone').closest('a');
+    const dangerLink = screen.getByRole('link', { name: 'Danger Zone' });
     expect(dangerLink).toHaveClass('bg-destructive/10', 'text-destructive');
   });
 
