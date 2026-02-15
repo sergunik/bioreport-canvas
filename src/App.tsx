@@ -20,7 +20,11 @@ import DiagnosticReportsList from "./pages/DiagnosticReportsList";
 import NewDiagnosticReport from "./pages/NewDiagnosticReport";
 import DiagnosticReportDetail from "./pages/DiagnosticReportDetail";
 import Settings from "./pages/Settings";
-import { ProfileSettings, SecuritySettings, DangerZone } from "./pages/Settings";
+import {
+  ProfileSettingsPage,
+  SecuritySettingsPage,
+  DangerZoneSection,
+} from "./pages/settings/index";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -61,9 +65,9 @@ const App = () => (
               <Route path="/diagnostic-reports/:id" element={<DiagnosticReportDetail />} />
               <Route path="/settings" element={<Settings />}>
                 <Route index element={<Navigate to="/settings/profile" replace />} />
-                <Route path="profile" element={<ProfileSettings />} />
-                <Route path="security" element={<SecuritySettings />} />
-                <Route path="danger" element={<DangerZone />} />
+                <Route path="profile" element={<ProfileSettingsPage />} />
+                <Route path="security" element={<SecuritySettingsPage />} />
+                <Route path="danger" element={<DangerZoneSection />} />
               </Route>
             </Route>
           </Routes>

@@ -1,0 +1,26 @@
+---
+description: Project stack and architectural boundaries
+alwaysApply: true
+---
+
+# BioReport Project Context
+
+- Stack: React 18 + TypeScript + Vite + Tailwind + shadcn/ui.
+- Routing: `react-router-dom` with guarded routes.
+- Data fetching and caching: TanStack Query.
+- Forms and validation: `react-hook-form` + `zod` + `zodResolver`.
+- i18n: `react-i18next` and translation keys via `t(...)`.
+
+## Architecture Boundaries
+
+- Use `src/api/client.ts` as the single HTTP client.
+- Keep HTTP calls in `src/api/services/*`.
+- UI/pages/components call service methods, not raw `fetch`.
+- API payload/response types must come from `src/types/api.ts`.
+- Reuse existing UI primitives from `src/components/ui/*` before creating new ones.
+
+## Imports and Paths
+
+- Prefer alias imports via `@/...` where configured.
+- Keep page-level logic in `src/pages/*`.
+- Keep shared/reusable logic in `src/components/*`, `src/hooks/*`, or `src/lib/*`.

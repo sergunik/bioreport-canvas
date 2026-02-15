@@ -1,0 +1,36 @@
+---
+description: Run all project commands inside Docker app container
+alwaysApply: true
+---
+
+# Command Execution Contract
+
+- Never run project commands directly on the host.
+- Always run commands via:
+
+```sh
+docker-compose exec app <command>
+```
+
+## Required Examples
+
+- Install:
+```sh
+docker-compose exec app bun install
+```
+- Build:
+```sh
+docker-compose exec app bun run build
+```
+- Lint:
+```sh
+docker-compose exec app bun run lint
+```
+- Test:
+```sh
+docker-compose exec app bun run test
+```
+
+## Verification Rule
+
+- After non-trivial code changes, run build, lint, and tests in the container.

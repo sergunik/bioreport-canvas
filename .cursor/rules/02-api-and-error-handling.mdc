@@ -1,0 +1,25 @@
+---
+description: API service usage and error handling conventions
+alwaysApply: true
+---
+
+# API and Error Handling
+
+- Use `api` from `src/api/client.ts`; do not add ad-hoc HTTP clients.
+- Keep endpoint calls in service files under `src/api/services/*`.
+- Components should call service methods (`profileService`, `securityService`, etc.).
+- Keep request/response typing strict using interfaces from `src/types/api.ts`.
+
+## Error Handling Pattern
+
+- In async UI actions, handle:
+  - `error instanceof ApiClientError`
+  - validation errors via `error.isValidationError()`
+  - field mapping via `error.getFieldErrors()`
+- For non-validation API errors, show destructive toast with `error.message`.
+- For unknown errors, show generic localized error toast.
+
+## Security-Sensitive Data
+
+- Do not send secrets in query params.
+- Prefer JSON body for sensitive fields such as passwords.

@@ -1,0 +1,21 @@
+---
+description: UI consistency, i18n usage, and accessibility basics
+alwaysApply: true
+---
+
+# UI, i18n, and Accessibility
+
+- Reuse existing shadcn/ui primitives from `src/components/ui/*`.
+- Match existing visual style and spacing conventions in nearby pages.
+- Use `cn(...)` helper for conditional class composition.
+
+## i18n
+
+- Use `useTranslation()` and `t('...')` for user-facing strings.
+- Avoid introducing new hardcoded UI text when translation keys exist.
+
+## Accessibility
+
+- Keep semantic labels connected to inputs via `htmlFor`/`id`.
+- Use `aria-invalid` for invalid form inputs.
+- Preserve keyboard accessibility of dialogs, menus, and buttons.

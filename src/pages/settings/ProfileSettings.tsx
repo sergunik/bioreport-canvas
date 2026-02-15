@@ -2,19 +2,12 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import * as z from 'zod';
 import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -26,6 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 import { profileService, ApiClientError } from '@/api';
 import { LANGUAGE_OPTIONS, TIMEZONE_OPTIONS } from '@/types';
 import type { Profile } from '@/types/api';
+import SettingsSectionCard from './components/SettingsSectionCard';
+import FormErrorText from './components/FormErrorText';
 
 const profileSchema = z.object({
   nickname: z.string().max(255).optional().nullable(),
@@ -35,7 +30,7 @@ const profileSchema = z.object({
 
 type ProfileFormData = z.infer<typeof profileSchema>;
 
-export default function ProfileSettings() {
+export default function ProfileSettingsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -144,15 +139,12 @@ export default function ProfileSettings() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('settings.profile.title')}</CardTitle>
-          <CardDescription>{t('settings.profile.subtitle')}</CardDescription>
-        </CardHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            {/* Read-only fields */}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <SettingsSectionCard
+          title={t('settings.profile.title')}
+          description={t('settings.profile.subtitle')}
+        >
+          <div className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-muted-foreground">
@@ -187,7 +179,6 @@ export default function ProfileSettings() {
               />
             </div>
 
-            {/* Editable fields */}
             <div className="space-y-2">
               <Label htmlFor="nickname">{t('accountSetup.nickname.label')}</Label>
               <Input
@@ -195,11 +186,7 @@ export default function ProfileSettings() {
                 placeholder={t('accountSetup.nickname.placeholder')}
                 {...register('nickname')}
               />
-              {errors.nickname && (
-                <p className="text-sm text-destructive">
-                  {errors.nickname.message}
-                </p>
-              )}
+              <FormErrorText message={errors.nickname?.message} />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -223,11 +210,7 @@ export default function ProfileSettings() {
                     </Select>
                   )}
                 />
-                {errors.language && (
-                  <p className="text-sm text-destructive">
-                    {errors.language.message}
-                  </p>
-                )}
+                <FormErrorText message={errors.language?.message} />
               </div>
 
               <div className="space-y-2">
@@ -250,11 +233,7 @@ export default function ProfileSettings() {
                     </Select>
                   )}
                 />
-                {errors.timezone && (
-                  <p className="text-sm text-destructive">
-                    {errors.timezone.message}
-                  </p>
-                )}
+                <FormErrorText message={errors.timezone?.message} />
               </div>
             </div>
 
@@ -264,9 +243,9 @@ export default function ProfileSettings() {
                 {t('common.save')}
               </Button>
             </div>
-          </CardContent>
-        </form>
-      </Card>
+          </div>
+        </SettingsSectionCard>
+      </form>
     </div>
   );
 }

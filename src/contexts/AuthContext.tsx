@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import type { User, Account, AuthState } from '@/types/api';
 import { authService, accountService, ApiClientError } from '@/api';

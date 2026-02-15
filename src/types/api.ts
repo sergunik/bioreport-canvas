@@ -185,9 +185,10 @@ export interface UpdateProfileResponse {
 // ==================== Security Types (/me/security) ====================
 
 export interface UpdateSecurityRequest {
-  current_password: string;
+  current_password?: string;
   email?: string;
   password?: string;
+  password_confirmation?: string;
 }
 
 export interface UpdateSecurityResponse {

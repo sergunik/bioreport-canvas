@@ -1,0 +1,17 @@
+---
+description: Form implementation and validation rules
+alwaysApply: true
+---
+
+# Forms and Validation
+
+- Build forms with `react-hook-form` and `zodResolver`.
+- Define a dedicated Zod schema per form.
+- Keep validation messages and UI behavior aligned with backend contract.
+- Wire field-level backend validation errors back into form fields.
+
+## UI Conventions
+
+- Use project form UI components (`Input`, `Label`, `Button`, etc.).
+- Mark invalid fields with `aria-invalid`.
+- Render field errors with shared component patterns already used in codebase.
