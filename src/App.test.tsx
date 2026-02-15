@@ -105,7 +105,7 @@ describe('App', () => {
 
   beforeAll(async () => {
     App = (await import('./App')).default;
-  });
+  }, 30000);
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -174,9 +174,11 @@ describe('ProfileSettingsPage', () => {
       });
     });
 
-    expect(mockToast).toHaveBeenCalledWith({
-      title: 'common.success',
-      description: 'settings.profile.saved',
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith({
+        title: 'common.success',
+        description: 'settings.profile.saved',
+      });
     });
   });
 
