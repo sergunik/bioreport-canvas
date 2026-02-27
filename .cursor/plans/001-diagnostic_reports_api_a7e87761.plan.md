@@ -25,7 +25,6 @@ isProject: false
 
 # 001 - Diagnostic Reports and Observations — API integration
 
-
 ---
 
 ## Context
@@ -53,13 +52,13 @@ Add list response type for `GET /diagnostic-reports`: e.g. `{ data: DiagnosticRe
 
 ## 2. API services
 
-**New file: [src/api/services/diagnosticReportService.ts**](src/api/services/diagnosticReportService.ts)
+**New file: [src/api/services/diagnosticReportService.ts](src/api/services/diagnosticReportService.ts)**
 
 - `list(): Promise<{ data: DiagnosticReportResource[] }>` — `GET /diagnostic-reports`
 - `get(id: number): Promise<DiagnosticReportResource>` — `GET /diagnostic-reports/{id}`
 - `create(data: StoreDiagnosticReportRequest): Promise<DiagnosticReportResource>` — `POST /diagnostic-reports`
 
-**New file: [src/api/services/observationService.ts**](src/api/services/observationService.ts)
+**New file: [src/api/services/observationService.ts](src/api/services/observationService.ts)**
 
 - `create(diagnosticReportId: number, data: StoreObservationRequest): Promise<ObservationResource>` — `POST /diagnostic-reports/{diagnosticReportId}/observations`
 
@@ -69,7 +68,7 @@ Use the existing [src/api/client.ts](src/api/client.ts) (`api.get`, `api.post`) 
 
 ## 3. New Diagnostic Report page — form and create flow
 
-**File: [src/pages/NewDiagnosticReport.tsx**](src/pages/NewDiagnosticReport.tsx)
+**File: [src/pages/NewDiagnosticReport.tsx](src/pages/NewDiagnosticReport.tsx)**
 
 - **Form model vs API:**
   - Keep **Report Title** and **Notes**; send both in create payload (title once API supports it; if spec not updated yet, send title in request and document that backend will add the field).
@@ -85,7 +84,7 @@ Use the existing [src/api/client.ts](src/api/client.ts) (`api.get`, `api.post`) 
 
 ## 4. Report list page — connect to API
 
-**File: [src/pages/DiagnosticReportsList.tsx**](src/pages/DiagnosticReportsList.tsx)
+**File: [src/pages/DiagnosticReportsList.tsx](src/pages/DiagnosticReportsList.tsx)**
 
 - Use React Query: `useQuery` to call `diagnosticReportService.list()`.
 - Show loading and error states; render list of reports (e.g. card or table with id, title/notes, date; link to `/diagnostic-reports/:id`).
@@ -96,7 +95,7 @@ Use the existing [src/api/client.ts](src/api/client.ts) (`api.get`, `api.post`) 
 
 ## 5. Report detail page (new)
 
-**New file: [src/pages/DiagnosticReportDetail.tsx**](src/pages/DiagnosticReportDetail.tsx) (or similar name)
+**New file: [src/pages/DiagnosticReportDetail.tsx](src/pages/DiagnosticReportDetail.tsx)** (or similar name)
 
 - Route: `/diagnostic-reports/:id`.
 - Fetch report with `diagnosticReportService.get(Number(id))` (e.g. via `useQuery`). Handle loading and 404 (navigate to list or show not-found).

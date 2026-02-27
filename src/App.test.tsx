@@ -42,6 +42,14 @@ vi.mock('./pages/DiagnosticReportDetail', () => ({
   default: () => <div>Diagnostic Report Detail Page</div>,
 }));
 
+vi.mock('./pages/DocumentsList', () => ({
+  default: () => <div>Documents List Page</div>,
+}));
+
+vi.mock('./pages/DocumentUpload', () => ({
+  default: () => <div>Document Upload Page</div>,
+}));
+
 vi.mock('./pages/Settings', () => ({
   default: () => <div>Settings Page</div>,
 }));
@@ -264,6 +272,18 @@ describe('App', () => {
       window.history.pushState({}, '', '/diagnostic-reports/123');
       render(<App />);
       expect(window.location.pathname).toBe('/diagnostic-reports/123');
+    });
+
+    it('renders documents list when authenticated', () => {
+      window.history.pushState({}, '', '/documents');
+      render(<App />);
+      expect(window.location.pathname).toBe('/documents');
+    });
+
+    it('renders document upload when authenticated', () => {
+      window.history.pushState({}, '', '/documents/upload');
+      render(<App />);
+      expect(window.location.pathname).toBe('/documents/upload');
     });
 
     it('renders settings when authenticated', () => {

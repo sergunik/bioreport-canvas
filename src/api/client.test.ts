@@ -79,4 +79,17 @@ describe('apiClient', () => {
     const result = await apiClient('/delete');
     expect(result).toEqual({});
   });
+
+  it('does not set JSON content-type for FormData body', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ uuid: '123' }), { status: 200 }));
+    const formData = new FormData();
+    formData.append('file', new File(['pdf'], 'sample.pdf', { type: 'application/pdf' }));
+
+    await apiClient('/documents', { method: 'POST', body: formData });
+
+    const callArgs = fetchMock.mock.calls[0][1];
+    const headers = callArgs.headers as Record<string, string>;
+    expect(headers['Content-Type']).toBeUndefined();
+    expect(headers['Accept']).toBe('application/json');
+  });
 });
