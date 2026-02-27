@@ -163,12 +163,49 @@
       "exploreTimeline": {
         "title": "Explore Your Timeline",
         "description": "View and analyze your health history"
+      },
+      "uploadDocument": {
+        "title": "Upload document",
+        "description": "Upload a PDF document for processing"
       }
     },
     "stats": {
       "totalReports": "Total Reports",
+      "totalUploadedDocuments": "Total uploaded documents",
       "familyMembers": "Family Members",
       "lastActivity": "Last Activity"
+    }
+  },
+  "documents": {
+    "upload": {
+      "title": "Upload document",
+      "subtitle": "Upload a PDF to process later",
+      "dropText": "Drop your PDF here",
+      "hint": "Only application/pdf • Max size 10MB",
+      "selectFile": "Select file",
+      "success": "Document uploaded successfully",
+      "errorGeneric": "Upload failed. Please try again.",
+      "validationWrongType": "Only PDF files are allowed",
+      "validationTooLarge": "File size must not exceed 10 MB"
+    },
+    "list": {
+      "title": "Documents",
+      "subtitle": "View and manage your uploaded documents",
+      "fileName": "File name",
+      "createdAt": "Created at",
+      "fileSize": "File size",
+      "status": "Status",
+      "statusValue": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "done": "Done",
+        "failed": "Failed",
+        "unknown": "Unknown"
+      },
+      "emptyTitle": "No documents yet",
+      "emptyDescription": "Upload your first PDF to get started.",
+      "errorLoad": "Failed to load documents",
+      "uploadFirst": "Upload document"
     }
   },
   "settings": {

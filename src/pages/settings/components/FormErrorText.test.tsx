@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import FormErrorText from './FormErrorText';
+import FormErrorText from '@/pages/settings/components/FormErrorText';
 
 describe('FormErrorText', () => {
   it('renders error message when provided', () => {

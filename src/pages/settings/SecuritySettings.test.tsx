@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import SecuritySettingsPage from './SecuritySettings';
+import SecuritySettingsPage from '@/pages/settings/SecuritySettings';
 import type { Profile } from '@/types/api';
 
 const mockToast = vi.fn();

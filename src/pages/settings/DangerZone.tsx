@@ -22,8 +22,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { profileService, ApiClientError } from '@/api';
-import FormErrorText from './components/FormErrorText';
-import SettingsSectionCard from './components/SettingsSectionCard';
+import FormErrorText from '@/pages/settings/components/FormErrorText';
+import SettingsSectionCard from '@/pages/settings/components/SettingsSectionCard';
 
 const deleteSchema = z.object({
   password: z.string().min(1, 'Password is required'),

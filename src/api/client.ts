@@ -86,8 +86,9 @@ export async function apiClient<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const isFormData = options.body instanceof FormData;
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     'Accept': 'application/json',
     ...options.headers,
   };
@@ -161,6 +162,13 @@ export const api = {
       body: data !== undefined ? JSON.stringify(data) : undefined,
     });
   },
+
+  postForm: <T>(endpoint: string, formData: FormData, options?: RequestInit) =>
+    apiClient<T>(endpoint, {
+      ...options,
+      method: 'POST',
+      body: formData,
+    }),
 };
 
 export default api;

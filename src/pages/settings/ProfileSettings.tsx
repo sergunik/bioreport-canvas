@@ -19,8 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 import { profileService, ApiClientError } from '@/api';
 import { LANGUAGE_OPTIONS, TIMEZONE_OPTIONS } from '@/types';
 import type { Profile } from '@/types/api';
-import SettingsSectionCard from './components/SettingsSectionCard';
-import FormErrorText from './components/FormErrorText';
+import SettingsSectionCard from '@/pages/settings/components/SettingsSectionCard';
+import FormErrorText from '@/pages/settings/components/FormErrorText';
 
 const profileSchema = z.object({
   nickname: z.string().max(255).optional().nullable(),

@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import {
   FlaskConical,
   User,
   Users,
   Activity,
   FileText,
+  FileUp,
   Clock,
   ArrowRight,
   Sparkles,
@@ -16,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { documentService } from '@/api';
 import { cn } from '@/lib/utils';
 
 interface QuickActionCardProps {
@@ -36,7 +39,15 @@ function QuickActionCard({
   comingSoon = false,
   primary = false,
 }: QuickActionCardProps) {
-  const navigate = useNavigate();
+  const isClickable = !comingSoon && Boolean(onClick);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!isClickable || !onClick) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick();
+    }
+  };
 
   return (
     <Card
@@ -48,6 +59,9 @@ function QuickActionCard({
         primary && !comingSoon && 'border-primary/20 bg-primary/5'
       )}
       onClick={comingSoon ? undefined : onClick}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={handleKeyDown}
     >
       <CardContent className="flex items-start gap-4 p-5">
         <div
@@ -83,19 +97,41 @@ interface StatCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
+  onClick?: () => void;
 }
 
-function StatCard({ label, value, icon }: StatCardProps) {
+function StatCard({ label, value, icon, onClick }: StatCardProps) {
+  const isClickable = Boolean(onClick);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick) return;
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick();
+    }
+  };
+
+  const content = (
+    <>
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
+        {icon}
+      </div>
+      <div>
+        <p className="text-2xl font-bold text-foreground">{value}</p>
+        <p className="text-sm text-muted-foreground">{label}</p>
+      </div>
+    </>
+  );
   return (
-    <Card>
+    <Card
+      className={isClickable ? 'cursor-pointer transition-colors hover:bg-muted/50' : undefined}
+      onClick={onClick}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      onKeyDown={handleKeyDown}
+    >
       <CardContent className="flex items-center gap-4 p-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
-          {icon}
-        </div>
-        <div>
-          <p className="text-2xl font-bold text-foreground">{value}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
+        {content}
       </CardContent>
     </Card>
   );
@@ -105,8 +141,13 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { account, hasCompletedSetup } = useAuth();
+  const { data: documentsData } = useQuery({
+    queryKey: ['documents'],
+    queryFn: () => documentService.list(),
+  });
 
   const displayName = account?.nickname || 'there';
+  const documentCount = documentsData?.data?.length ?? 0;
 
   return (
     <MainLayout>
@@ -162,6 +203,12 @@ export default function Dashboard() {
                   icon={<FileText className="h-5 w-5" />}
                   onClick={() => navigate('/diagnostic-reports')}
                 />
+                <QuickActionCard
+                  title={t('dashboard.quickActions.uploadDocument.title')}
+                  description={t('dashboard.quickActions.uploadDocument.description')}
+                  icon={<FileUp className="h-5 w-5" />}
+                  onClick={() => navigate('/documents/upload')}
+                />
                 {!hasCompletedSetup && (
                   <QuickActionCard
                     title={t('dashboard.quickActions.completeProfile.title')}
@@ -190,9 +237,10 @@ export default function Dashboard() {
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Summary</h2>
             <StatCard
-              label={t('dashboard.stats.totalReports')}
-              value={0}
+              label={t('dashboard.stats.totalUploadedDocuments')}
+              value={documentCount}
               icon={<FileText className="h-5 w-5" />}
+              onClick={() => navigate('/documents')}
             />
             <StatCard
               label={t('dashboard.stats.familyMembers')}

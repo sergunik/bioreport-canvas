@@ -1,5 +1,5 @@
 // Re-export all types
-export * from './api';
+export * from '@/types/api';
 
 // UI-specific types
 export interface NavItem {

@@ -141,6 +141,28 @@ export interface StoreObservationRequest {
   reference_unit?: string | null;
 }
 
+// ==================== Document Types ====================
+
+export type DocumentJobStatus = 'pending' | 'processing' | 'done' | 'failed' | null;
+
+export interface DocumentResource {
+  uuid: string;
+  file_size_bytes: number;
+  mime_type: string;
+  processed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  job_status: DocumentJobStatus;
+}
+
+export interface DocumentListResponse {
+  data: DocumentResource[];
+}
+
+export interface DocumentStoreResponse {
+  uuid: string;
+}
+
 // ==================== Error Types ====================
 
 export interface ValidationError {
