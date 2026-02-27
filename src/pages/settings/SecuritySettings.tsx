@@ -11,8 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { profileService, securityService, ApiClientError } from '@/api';
-import FormErrorText from './components/FormErrorText';
-import SettingsSectionCard from './components/SettingsSectionCard';
+import FormErrorText from '@/pages/settings/components/FormErrorText';
+import SettingsSectionCard from '@/pages/settings/components/SettingsSectionCard';
 
 const changeEmailSchema = z.object({
   email: z.string().email('Please enter a valid email'),

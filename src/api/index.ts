@@ -1,8 +1,8 @@
-export { default as api, ApiClientError } from './client';
-export { authService } from './services/authService';
-export { accountService } from './services/accountService';
-export { profileService } from './services/profileService';
-export { securityService } from './services/securityService';
-export { diagnosticReportService } from './services/diagnosticReportService';
-export { documentService } from './services/documentService';
-export { observationService } from './services/observationService';
+export { default as api, ApiClientError } from '@/api/client';
+export { authService } from '@/api/services/authService';
+export { accountService } from '@/api/services/accountService';
+export { profileService } from '@/api/services/profileService';
+export { securityService } from '@/api/services/securityService';
+export { diagnosticReportService } from '@/api/services/diagnosticReportService';
+export { documentService } from '@/api/services/documentService';
+export { observationService } from '@/api/services/observationService';

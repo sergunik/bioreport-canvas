@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useNavigate } from 'react-router-dom';
-import DangerZoneSection from './DangerZone';
+import DangerZoneSection from '@/pages/settings/DangerZone';
 
 const mockToast = vi.fn();
 const mockLogout = vi.fn();

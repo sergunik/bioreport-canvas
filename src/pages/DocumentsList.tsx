@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { documentService } from '@/api';
+import type { DocumentJobStatus } from '@/types/api';
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -35,7 +36,7 @@ function formatSize(bytes: number): string {
 }
 
 function statusVariant(
-  status: string | null
+  status: DocumentJobStatus
 ): 'default' | 'secondary' | 'destructive' | 'outline' {
   switch (status) {
     case 'pending':
@@ -51,12 +52,17 @@ function statusVariant(
   }
 }
 
-function statusLabel(status: string | null, t: (key: string) => string): string {
+function statusLabel(status: DocumentJobStatus, t: (key: string) => string): string {
   if (!status) {
     return t('documents.list.statusValue.unknown');
   }
 
-  const knownStatuses = new Set(['pending', 'processing', 'done', 'failed']);
+  const knownStatuses: Set<NonNullable<DocumentJobStatus>> = new Set([
+    'pending',
+    'processing',
+    'done',
+    'failed',
+  ]);
   if (!knownStatuses.has(status)) {
     return t('documents.list.statusValue.unknown');
   }

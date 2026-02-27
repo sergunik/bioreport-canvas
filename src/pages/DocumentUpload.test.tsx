@@ -1,7 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import DocumentUpload from './DocumentUpload';
+import DocumentUpload from '@/pages/DocumentUpload';
 
 const mockNavigate = vi.fn();
 const mockUpload = vi.fn();

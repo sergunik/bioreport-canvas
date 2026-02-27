@@ -9,25 +9,25 @@ import "@/i18n";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute, GuestRoute, AccountSetupRoute } from "@/components/auth";
 
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import AccountSetup from "./pages/AccountSetup";
-import Dashboard from "./pages/Dashboard";
-import DiagnosticReportsList from "./pages/DiagnosticReportsList";
-import NewDiagnosticReport from "./pages/NewDiagnosticReport";
-import DiagnosticReportDetail from "./pages/DiagnosticReportDetail";
-import DocumentsList from "./pages/DocumentsList";
-import DocumentUpload from "./pages/DocumentUpload";
-import Settings from "./pages/Settings";
+import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import AccountSetup from "@/pages/AccountSetup";
+import Dashboard from "@/pages/Dashboard";
+import DiagnosticReportsList from "@/pages/DiagnosticReportsList";
+import NewDiagnosticReport from "@/pages/NewDiagnosticReport";
+import DiagnosticReportDetail from "@/pages/DiagnosticReportDetail";
+import DocumentsList from "@/pages/DocumentsList";
+import DocumentUpload from "@/pages/DocumentUpload";
+import Settings from "@/pages/Settings";
 import {
   ProfileSettingsPage,
   SecuritySettingsPage,
   DangerZoneSection,
-} from "./pages/settings/index";
-import NotFound from "./pages/NotFound";
+} from "@/pages/settings/index";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient({
   defaultOptions: {

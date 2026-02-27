@@ -1,6 +1,6 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import ProfileSettingsPage from './ProfileSettings';
+import ProfileSettingsPage from '@/pages/settings/ProfileSettings';
 import type { Profile } from '@/types/api';
 
 const mockToast = vi.fn();

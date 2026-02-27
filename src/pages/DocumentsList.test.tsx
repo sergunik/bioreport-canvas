@@ -2,7 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import DocumentsList from './DocumentsList';
+import DocumentsList from '@/pages/DocumentsList';
 
 const mockNavigate = vi.fn();
 const mockList = vi.fn();
@@ -75,7 +75,7 @@ describe('DocumentsList', () => {
           created_at: '2025-01-02T00:00:00.000Z',
           updated_at: '2025-01-02T00:00:00.000Z',
           job_status: 'unexpected',
-        },
+        } as unknown as import('@/types/api').DocumentResource,
       ],
     });
 

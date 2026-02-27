@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { describe, it, expect, vi } from 'vitest';
-import { AccountSetupRoute } from './AccountSetupRoute';
+import { AccountSetupRoute } from '@/components/auth/AccountSetupRoute';
 
 const mockUseAuth = vi.fn();
 vi.mock('@/contexts/AuthContext', () => ({

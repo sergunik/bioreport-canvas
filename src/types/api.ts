@@ -143,6 +143,8 @@ export interface StoreObservationRequest {
 
 // ==================== Document Types ====================
 
+export type DocumentJobStatus = 'pending' | 'processing' | 'done' | 'failed' | null;
+
 export interface DocumentResource {
   uuid: string;
   file_size_bytes: number;
@@ -150,7 +152,7 @@ export interface DocumentResource {
   processed_at: string | null;
   created_at: string;
   updated_at: string;
-  job_status: string | null;
+  job_status: DocumentJobStatus;
 }
 
 export interface DocumentListResponse {

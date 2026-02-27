@@ -13,7 +13,7 @@ vi.mock('@/api/client', () => ({
   },
 }));
 
-import { documentService } from './documentService';
+import { documentService } from '@/api/services/documentService';
 
 describe('documentService', () => {
   beforeEach(() => {
