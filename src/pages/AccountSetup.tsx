@@ -1,17 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { format } from 'date-fns';
-import { Loader2, CalendarIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { AuthLayout } from '@/components/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
 import {
   Card,
   CardContent,
@@ -20,11 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -36,18 +29,59 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { accountService, ApiClientError } from '@/api';
 import { LANGUAGE_OPTIONS, TIMEZONE_OPTIONS, type Sex } from '@/types';
-import { cn } from '@/lib/utils';
+
+const MIN_BIRTH_YEAR = 1900;
+const DEFAULT_BIRTH_YEAR = '2000';
+
+const MONTH_OPTIONS = [
+  { value: '1', label: 'January' },
+  { value: '2', label: 'February' },
+  { value: '3', label: 'March' },
+  { value: '4', label: 'April' },
+  { value: '5', label: 'May' },
+  { value: '6', label: 'June' },
+  { value: '7', label: 'July' },
+  { value: '8', label: 'August' },
+  { value: '9', label: 'September' },
+  { value: '10', label: 'October' },
+  { value: '11', label: 'November' },
+  { value: '12', label: 'December' },
+];
 
 const accountSetupSchema = z.object({
   sex: z.enum(['male', 'female'], {
     required_error: 'Please select your sex',
   }),
-  date_of_birth: z.date({
-    required_error: 'Please select your date of birth',
-  }),
+  birthDay: z.string().min(1, 'Please select day'),
+  birthMonth: z.string().min(1, 'Please select month'),
+  birthYear: z
+    .string()
+    .min(1, 'Please select year')
+    .refine((value) => {
+      const numericYear = Number(value);
+      const currentYear = new Date().getFullYear();
+      return Number.isInteger(numericYear) && numericYear >= MIN_BIRTH_YEAR && numericYear <= currentYear;
+    }, 'Please select a valid year'),
   nickname: z.string().max(255).optional().nullable(),
   language: z.string().min(2).max(2).default('en'),
   timezone: z.string().default('UTC'),
+}).superRefine((data, ctx) => {
+  const day = Number(data.birthDay);
+  const month = Number(data.birthMonth);
+  const year = Number(data.birthYear);
+
+  if (!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)) {
+    return;
+  }
+
+  const maxDayInMonth = new Date(year, month, 0).getDate();
+  if (day > maxDayInMonth) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['birthDay'],
+      message: 'Please select a valid date of birth',
+    });
+  }
 });
 
 type AccountSetupFormData = z.infer<typeof accountSetupSchema>;
@@ -65,24 +99,61 @@ export default function AccountSetup() {
     handleSubmit,
     formState: { errors },
     setError,
+    setValue,
     watch,
   } = useForm<AccountSetupFormData>({
     resolver: zodResolver(accountSetupSchema),
     defaultValues: {
+      birthDay: '1',
+      birthMonth: '1',
+      birthYear: DEFAULT_BIRTH_YEAR,
       language: 'en',
       timezone: 'UTC',
     },
   });
 
-  const selectedSex = watch('sex');
+  const selectedBirthMonth = watch('birthMonth');
+  const selectedBirthYear = watch('birthYear');
+  const selectedBirthDay = watch('birthDay');
+
+  const maxBirthDay = useMemo(() => {
+    const month = Number(selectedBirthMonth);
+    const year = Number(selectedBirthYear);
+    if (!month || !year) {
+      return 31;
+    }
+
+    return new Date(year, month, 0).getDate();
+  }, [selectedBirthMonth, selectedBirthYear]);
+
+  const dayOptions = useMemo(
+    () => Array.from({ length: maxBirthDay }, (_, index) => String(index + 1)),
+    [maxBirthDay]
+  );
+
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from(
+      { length: currentYear - MIN_BIRTH_YEAR + 1 },
+      (_, index) => String(currentYear - index)
+    );
+  }, []);
+
+  useEffect(() => {
+    const day = Number(selectedBirthDay);
+    if (day > maxBirthDay) {
+      setValue('birthDay', String(maxBirthDay), { shouldValidate: true });
+    }
+  }, [maxBirthDay, selectedBirthDay, setValue]);
 
   const onSubmit = async (data: AccountSetupFormData) => {
     setIsLoading(true);
 
     try {
+      const dateOfBirth = `${data.birthYear}-${data.birthMonth.padStart(2, '0')}-${data.birthDay.padStart(2, '0')}`;
       const account = await accountService.createAccount({
         sex: data.sex as Sex,
-        date_of_birth: format(data.date_of_birth, 'yyyy-MM-dd'),
+        date_of_birth: dateOfBirth,
         nickname: data.nickname || null,
         language: data.language,
         timezone: data.timezone,
@@ -99,6 +170,14 @@ export default function AccountSetup() {
         if (error.isValidationError()) {
           const fieldErrors = error.getFieldErrors();
           Object.keys(fieldErrors).forEach((field) => {
+            if (field === 'date_of_birth') {
+              const message = fieldErrors[field][0];
+              setError('birthDay', { message });
+              setError('birthMonth', { message });
+              setError('birthYear', { message });
+              return;
+            }
+
             setError(field as keyof AccountSetupFormData, {
               message: fieldErrors[field][0],
             });
@@ -169,48 +248,69 @@ export default function AccountSetup() {
             {/* Date of Birth */}
             <div className="space-y-2">
               <Label>{t('accountSetup.dateOfBirth.label')}</Label>
-              <Controller
-                name="date_of_birth"
-                control={control}
-                render={({ field }) => (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'w-full justify-start text-left font-normal',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? (
-                          format(field.value, 'PPP')
-                        ) : (
-                          <span>{t('accountSetup.dateOfBirth.placeholder')}</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date('1900-01-01')
-                        }
-                        initialFocus
-                        className="pointer-events-auto"
-                        captionLayout="dropdown-buttons"
-                        fromYear={1900}
-                        toYear={new Date().getFullYear()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                )}
-              />
-              {errors.date_of_birth && (
+              <div className="grid grid-cols-3 gap-2">
+                <Controller
+                  name="birthDay"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={!!errors.birthDay}>
+                        <SelectValue placeholder="Day" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {dayOptions.map((day) => (
+                          <SelectItem key={day} value={day}>
+                            {day.padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+
+                <Controller
+                  name="birthMonth"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={!!errors.birthMonth}>
+                        <SelectValue placeholder="Month" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MONTH_OPTIONS.map((month) => (
+                          <SelectItem key={month.value} value={month.value}>
+                            {month.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+
+                <Controller
+                  name="birthYear"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={!!errors.birthYear}>
+                        <SelectValue placeholder="Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {yearOptions.map((year) => (
+                          <SelectItem key={year} value={year}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+              {(errors.birthDay || errors.birthMonth || errors.birthYear) && (
                 <p className="text-sm text-destructive">
-                  {errors.date_of_birth.message}
+                  {errors.birthDay?.message ||
+                    errors.birthMonth?.message ||
+                    errors.birthYear?.message}
                 </p>
               )}
             </div>

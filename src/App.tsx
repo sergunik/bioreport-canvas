@@ -25,6 +25,7 @@ import Settings from "@/pages/Settings";
 import {
   ProfileSettingsPage,
   SecuritySettingsPage,
+  SensitiveWordsSettingsPage,
   DangerZoneSection,
 } from "@/pages/settings/index";
 import NotFound from "@/pages/NotFound";
@@ -71,6 +72,7 @@ const App = () => (
                 <Route index element={<Navigate to="/settings/profile" replace />} />
                 <Route path="profile" element={<ProfileSettingsPage />} />
                 <Route path="security" element={<SecuritySettingsPage />} />
+                <Route path="sensitive-words" element={<SensitiveWordsSettingsPage />} />
                 <Route path="danger" element={<DangerZoneSection />} />
               </Route>
             </Route>

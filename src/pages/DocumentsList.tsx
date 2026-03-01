@@ -76,6 +76,10 @@ export default function DocumentsList() {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ['documents'],
     queryFn: () => documentService.list(),
+    refetchInterval: (query) => {
+      const docs = query.state.data?.data ?? [];
+      return docs.some((d) => d.job_status === 'pending' || d.job_status === 'processing') ? 5000 : false;
+    },
   });
 
   const documents = data?.data ?? [];

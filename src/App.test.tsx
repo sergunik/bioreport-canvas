@@ -57,6 +57,7 @@ vi.mock('./pages/Settings', () => ({
 vi.mock('./pages/settings/index', () => ({
   ProfileSettingsPage: () => <div>Profile Settings Page</div>,
   SecuritySettingsPage: () => <div>Security Settings Page</div>,
+  SensitiveWordsSettingsPage: () => <div>Sensitive Words Settings Page</div>,
   DangerZoneSection: () => <div>Danger Zone Section</div>,
 }));
 

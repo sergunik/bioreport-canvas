@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Menu, X, User, Settings, LogOut, Shield, FileText } from 'lucide-react';
+import { Menu, X, User, Settings, LogOut, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -84,14 +84,6 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  {t('nav.profile')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings/security')}>
-                  <Shield className="mr-2 h-4 w-4" />
-                  {t('nav.security')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/settings')}>
                   <Settings className="mr-2 h-4 w-4" />
                   {t('nav.settings')}
                 </DropdownMenuItem>

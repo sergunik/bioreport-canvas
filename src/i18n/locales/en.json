@@ -211,13 +211,13 @@
   "settings": {
     "title": "Settings",
     "profile": {
-      "title": "Profile Settings",
+      "title": "Profile",
       "subtitle": "Manage your personal information",
       "email": "Email",
       "saved": "Profile updated successfully"
     },
     "security": {
-      "title": "Security Settings",
+      "title": "Security",
       "subtitle": "Manage your account security",
       "changeEmail": {
         "title": "Change Email",
@@ -235,6 +235,17 @@
         "confirmPassword": "Confirm New Password",
         "submit": "Update Password",
         "success": "Password updated successfully"
+      }
+    },
+    "sensitiveWords": {
+      "title": "Sensitive Words",
+      "description": "Specify personal identifiers that must always be anonymized.\n\nInclude sensitive details such as first name, last name, middle name, street name, city, year of birth, and other identifying information.\n\nYou may enter terms in Latin (ICU) or non-Latin characters — the system will automatically transliterate and normalize them. Separate words with spaces. Commas or periods are allowed and will be automatically cleaned.",
+      "fieldLabel": "Words and identifiers",
+      "placeholder": "ivan shevchenko kyiv 1990 khreshchatyk",
+      "saved": "Sensitive words updated successfully",
+      "errors": {
+        "load": "Failed to load sensitive words",
+        "save": "Failed to save sensitive words"
       }
     },
     "dangerZone": {

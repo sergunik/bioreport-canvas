@@ -10,6 +10,7 @@ vi.mock('react-i18next', () => ({
         'settings.title': 'Settings',
         'settings.profile.title': 'Profile',
         'settings.security.title': 'Security',
+        'settings.sensitiveWords.title': 'Sensitive Words',
         'settings.dangerZone.title': 'Danger Zone',
       };
       return translations[key] || key;
@@ -29,6 +30,7 @@ function renderSettings(initialPath = '/settings') {
         <Route path="/settings" element={<Settings />}>
           <Route path="profile" element={<div>Profile Settings</div>} />
           <Route path="security" element={<div>Security Settings</div>} />
+          <Route path="sensitive-words" element={<div>Sensitive Words Content</div>} />
           <Route path="danger" element={<div>Danger Zone Content</div>} />
         </Route>
       </Routes>
@@ -46,6 +48,7 @@ describe('Settings', () => {
     renderSettings();
     expect(screen.getByRole('link', { name: 'Profile' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sensitive Words' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Danger Zone' })).toBeInTheDocument();
   });
 
@@ -62,6 +65,11 @@ describe('Settings', () => {
   it('renders danger zone when navigating to /settings/danger', () => {
     renderSettings('/settings/danger');
     expect(screen.getByText('Danger Zone Content')).toBeInTheDocument();
+  });
+
+  it('renders sensitive words when navigating to /settings/sensitive-words', () => {
+    renderSettings('/settings/sensitive-words');
+    expect(screen.getByText('Sensitive Words Content')).toBeInTheDocument();
   });
 
   it('applies active styling to profile link when on profile page', () => {

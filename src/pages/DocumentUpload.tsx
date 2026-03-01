@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { FileUp, FileText } from 'lucide-react';
 
@@ -26,6 +27,7 @@ function validateFile(file: File): string | null {
 export default function DocumentUpload() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -43,7 +45,8 @@ export default function DocumentUpload() {
       try {
         await documentService.upload(file);
         toast.success(t('documents.upload.success'));
-        navigate('/documents');
+        await queryClient.invalidateQueries({ queryKey: ['documents'] });
+        navigate('/documents', { replace: true });
       } catch (err) {
         if (err instanceof ApiClientError) {
           if (err.isValidationError()) {
@@ -59,7 +62,7 @@ export default function DocumentUpload() {
         setIsUploading(false);
       }
     },
-    [isUploading, navigate, t]
+    [isUploading, navigate, queryClient, t]
   );
 
   const onDrop = useCallback(

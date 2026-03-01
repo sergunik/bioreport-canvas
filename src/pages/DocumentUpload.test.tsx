@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import DocumentUpload from '@/pages/DocumentUpload';
 
 const mockNavigate = vi.fn();
@@ -53,17 +54,23 @@ vi.mock('@/api', () => ({
   },
 }));
 
+const queryClient = new QueryClient();
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  );
+}
+
 describe('DocumentUpload', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('blocks non-pdf files on client validation', async () => {
-    const { container } = render(
-      <MemoryRouter>
-        <DocumentUpload />
-      </MemoryRouter>
-    );
+    const { container } = renderWithProviders(<DocumentUpload />);
 
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const txtFile = new File(['abc'], 'notes.txt', { type: 'text/plain' });
@@ -75,11 +82,7 @@ describe('DocumentUpload', () => {
   });
 
   it('blocks files larger than 10MB', async () => {
-    const { container } = render(
-      <MemoryRouter>
-        <DocumentUpload />
-      </MemoryRouter>
-    );
+    const { container } = renderWithProviders(<DocumentUpload />);
 
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const bigFile = new File([new Uint8Array(10 * 1024 * 1024 + 1)], 'big.pdf', {
@@ -94,11 +97,7 @@ describe('DocumentUpload', () => {
 
   it('uploads valid pdf and redirects to documents list', async () => {
     mockUpload.mockResolvedValue({ uuid: 'doc-1' });
-    const { container } = render(
-      <MemoryRouter>
-        <DocumentUpload />
-      </MemoryRouter>
-    );
+    const { container } = renderWithProviders(<DocumentUpload />);
 
     const input = container.querySelector('input[type="file"]') as HTMLInputElement;
     const pdfFile = new File(['pdf'], 'report.pdf', { type: 'application/pdf' });
@@ -109,6 +108,6 @@ describe('DocumentUpload', () => {
       expect(mockUpload).toHaveBeenCalledWith(pdfFile);
     });
     expect(mockToastSuccess).toHaveBeenCalledWith('documents.upload.success');
-    expect(mockNavigate).toHaveBeenCalledWith('/documents');
+    expect(mockNavigate).toHaveBeenCalledWith('/documents', { replace: true });
   });
 });

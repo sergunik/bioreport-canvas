@@ -59,6 +59,7 @@ export interface Account {
   sex: Sex;
   language: string;
   timezone: string;
+  sensitive_words: string | null;
 }
 
 export interface CreateAccountRequest {
@@ -67,12 +68,14 @@ export interface CreateAccountRequest {
   nickname?: string | null;
   language?: string;
   timezone?: string;
+  sensitive_words?: string | null;
 }
 
 export interface UpdateAccountRequest {
   nickname?: string | null;
   language?: string;
   timezone?: string;
+  sensitive_words?: string | null;
   sex?: string;
   date_of_birth?: string;
 }
