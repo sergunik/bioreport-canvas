@@ -33,19 +33,19 @@ import { LANGUAGE_OPTIONS, TIMEZONE_OPTIONS, type Sex } from '@/types';
 const MIN_BIRTH_YEAR = 1900;
 const DEFAULT_BIRTH_YEAR = '2000';
 
-const MONTH_OPTIONS = [
-  { value: '1', label: 'January' },
-  { value: '2', label: 'February' },
-  { value: '3', label: 'March' },
-  { value: '4', label: 'April' },
-  { value: '5', label: 'May' },
-  { value: '6', label: 'June' },
-  { value: '7', label: 'July' },
-  { value: '8', label: 'August' },
-  { value: '9', label: 'September' },
-  { value: '10', label: 'October' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'December' },
+const MONTH_VALUES = [
+  { value: '1', key: 'dob.monthNames.january' },
+  { value: '2', key: 'dob.monthNames.february' },
+  { value: '3', key: 'dob.monthNames.march' },
+  { value: '4', key: 'dob.monthNames.april' },
+  { value: '5', key: 'dob.monthNames.may' },
+  { value: '6', key: 'dob.monthNames.june' },
+  { value: '7', key: 'dob.monthNames.july' },
+  { value: '8', key: 'dob.monthNames.august' },
+  { value: '9', key: 'dob.monthNames.september' },
+  { value: '10', key: 'dob.monthNames.october' },
+  { value: '11', key: 'dob.monthNames.november' },
+  { value: '12', key: 'dob.monthNames.december' },
 ];
 
 const accountSetupSchema = z.object({
@@ -138,6 +138,11 @@ export default function AccountSetup() {
       (_, index) => String(currentYear - index)
     );
   }, []);
+
+  const monthOptions = useMemo(
+    () => MONTH_VALUES.map((m) => ({ value: m.value, label: t(m.key) })),
+    [t]
+  );
 
   useEffect(() => {
     const day = Number(selectedBirthDay);
@@ -255,7 +260,7 @@ export default function AccountSetup() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger aria-invalid={!!errors.birthDay}>
-                        <SelectValue placeholder="Day" />
+                        <SelectValue placeholder={t('dob.day')} />
                       </SelectTrigger>
                       <SelectContent>
                         {dayOptions.map((day) => (
@@ -274,10 +279,10 @@ export default function AccountSetup() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger aria-invalid={!!errors.birthMonth}>
-                        <SelectValue placeholder="Month" />
+                        <SelectValue placeholder={t('dob.month')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {MONTH_OPTIONS.map((month) => (
+                        {monthOptions.map((month) => (
                           <SelectItem key={month.value} value={month.value}>
                             {month.label}
                           </SelectItem>
@@ -293,7 +298,7 @@ export default function AccountSetup() {
                   render={({ field }) => (
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger aria-invalid={!!errors.birthYear}>
-                        <SelectValue placeholder="Year" />
+                        <SelectValue placeholder={t('dob.year')} />
                       </SelectTrigger>
                       <SelectContent>
                         {yearOptions.map((year) => (

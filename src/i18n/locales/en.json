@@ -104,6 +104,25 @@
       "passwordsNoMatch": "Passwords do not match"
     }
   },
+  "dob": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year",
+    "monthNames": {
+      "january": "January",
+      "february": "February",
+      "march": "March",
+      "april": "April",
+      "may": "May",
+      "june": "June",
+      "july": "July",
+      "august": "August",
+      "september": "September",
+      "october": "October",
+      "november": "November",
+      "december": "December"
+    }
+  },
   "accountSetup": {
     "title": "Complete Your Profile",
     "subtitle": "Just a few more details to get you started",

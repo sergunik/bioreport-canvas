@@ -27,4 +27,16 @@ describe('sanitizeSensitiveWordsInput', () => {
     const input = 'ivan ivan shevchenko kyiv ivan shevchenko';
     expect(sanitizeSensitiveWordsInput(input)).toBe('ivan shevchenko kyiv');
   });
+
+  it('handles empty string input', () => {
+    expect(sanitizeSensitiveWordsInput('')).toBe('');
+  });
+
+  it('handles whitespace-only input', () => {
+    expect(sanitizeSensitiveWordsInput('   \n\t  ')).toBe('');
+  });
+
+  it('handles numeric-only input', () => {
+    expect(sanitizeSensitiveWordsInput('12345 67890')).toBe('12345 67890');
+  });
 });

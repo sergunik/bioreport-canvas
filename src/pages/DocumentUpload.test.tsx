@@ -54,9 +54,12 @@ vi.mock('@/api', () => ({
   },
 }));
 
-const queryClient = new QueryClient();
-
 function renderWithProviders(ui: React.ReactElement) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
   return render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>{ui}</MemoryRouter>
