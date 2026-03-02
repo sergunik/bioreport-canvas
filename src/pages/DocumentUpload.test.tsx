@@ -109,8 +109,8 @@ describe('DocumentUpload', () => {
 
     await waitFor(() => {
       expect(mockUpload).toHaveBeenCalledWith(pdfFile);
+      expect(mockToastSuccess).toHaveBeenCalledWith('documents.upload.success');
+      expect(mockNavigate).toHaveBeenCalledWith('/documents', { replace: true });
     });
-    expect(mockToastSuccess).toHaveBeenCalledWith('documents.upload.success');
-    expect(mockNavigate).toHaveBeenCalledWith('/documents', { replace: true });
   });
 });

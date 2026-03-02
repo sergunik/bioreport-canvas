@@ -151,6 +151,11 @@
     "errors": {
       "sexRequired": "Please select your sex",
       "dateOfBirthRequired": "Date of birth is required",
+      "birthDayRequired": "Please select day",
+      "birthMonthRequired": "Please select month",
+      "birthYearRequired": "Please select year",
+      "birthYearInvalid": "Please select a valid year",
+      "dateOfBirthInvalid": "Please select a valid date of birth",
       "languageRequired": "Please select a language",
       "timezoneRequired": "Please select a timezone"
     }

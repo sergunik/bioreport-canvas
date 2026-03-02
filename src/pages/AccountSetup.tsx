@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -48,43 +49,47 @@ const MONTH_VALUES = [
   { value: '12', key: 'dob.monthNames.december' },
 ];
 
-const accountSetupSchema = z.object({
-  sex: z.enum(['male', 'female'], {
-    required_error: 'Please select your sex',
-  }),
-  birthDay: z.string().min(1, 'Please select day'),
-  birthMonth: z.string().min(1, 'Please select month'),
-  birthYear: z
-    .string()
-    .min(1, 'Please select year')
-    .refine((value) => {
-      const numericYear = Number(value);
-      const currentYear = new Date().getFullYear();
-      return Number.isInteger(numericYear) && numericYear >= MIN_BIRTH_YEAR && numericYear <= currentYear;
-    }, 'Please select a valid year'),
-  nickname: z.string().max(255).optional().nullable(),
-  language: z.string().min(2).max(2).default('en'),
-  timezone: z.string().default('UTC'),
-}).superRefine((data, ctx) => {
-  const day = Number(data.birthDay);
-  const month = Number(data.birthMonth);
-  const year = Number(data.birthYear);
+function createAccountSetupSchema(t: TFunction) {
+  return z
+    .object({
+      sex: z.enum(['male', 'female'], {
+        required_error: t('accountSetup.errors.sexRequired'),
+      }),
+      birthDay: z.string().min(1, t('accountSetup.errors.birthDayRequired')),
+      birthMonth: z.string().min(1, t('accountSetup.errors.birthMonthRequired')),
+      birthYear: z
+        .string()
+        .min(1, t('accountSetup.errors.birthYearRequired'))
+        .refine((value) => {
+          const numericYear = Number(value);
+          const currentYear = new Date().getFullYear();
+          return Number.isInteger(numericYear) && numericYear >= MIN_BIRTH_YEAR && numericYear <= currentYear;
+        }, t('accountSetup.errors.birthYearInvalid')),
+      nickname: z.string().max(255).optional().nullable(),
+      language: z.string().min(2).max(2).default('en'),
+      timezone: z.string().default('UTC'),
+    })
+    .superRefine((data, ctx) => {
+      const day = Number(data.birthDay);
+      const month = Number(data.birthMonth);
+      const year = Number(data.birthYear);
 
-  if (!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)) {
-    return;
-  }
+      if (!Number.isInteger(day) || !Number.isInteger(month) || !Number.isInteger(year)) {
+        return;
+      }
 
-  const maxDayInMonth = new Date(year, month, 0).getDate();
-  if (day > maxDayInMonth) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['birthDay'],
-      message: 'Please select a valid date of birth',
+      const maxDayInMonth = new Date(year, month, 0).getDate();
+      if (day > maxDayInMonth) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['birthDay'],
+          message: t('accountSetup.errors.dateOfBirthInvalid'),
+        });
+      }
     });
-  }
-});
+}
 
-type AccountSetupFormData = z.infer<typeof accountSetupSchema>;
+type AccountSetupFormData = z.infer<ReturnType<typeof createAccountSetupSchema>>;
 
 export default function AccountSetup() {
   const { t } = useTranslation();
@@ -92,6 +97,8 @@ export default function AccountSetup() {
   const { setAccount } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+
+  const accountSetupSchema = useMemo(() => createAccountSetupSchema(t), [t]);
 
   const {
     register,
