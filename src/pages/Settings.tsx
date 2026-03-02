@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { User, Shield, AlertTriangle } from 'lucide-react';
+import { User, Shield, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,11 @@ const settingsNav = [
     href: '/settings/security',
     labelKey: 'settings.security.title',
     icon: Shield,
+  },
+  {
+    href: '/settings/sensitive-words',
+    labelKey: 'settings.sensitiveWords.title',
+    icon: ShieldCheck,
   },
   {
     href: '/settings/danger',
