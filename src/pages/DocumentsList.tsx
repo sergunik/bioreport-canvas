@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/table';
 import { documentService } from '@/api';
 import type { DocumentJobStatus } from '@/types/api';
+import { cn } from '@/lib/utils';
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -68,6 +69,10 @@ function statusLabel(status: DocumentJobStatus, t: (key: string) => string): str
   }
 
   return t(`documents.list.statusValue.${status}`);
+}
+
+function isClickableStatus(status: DocumentJobStatus): boolean {
+  return status === 'done' || status === 'failed';
 }
 
 export default function DocumentsList() {
@@ -128,7 +133,31 @@ export default function DocumentsList() {
               </TableHeader>
               <TableBody>
                 {documents.map((doc) => (
-                  <TableRow key={doc.uuid}>
+                  <TableRow
+                    key={doc.uuid}
+                    className={cn(
+                      isClickableStatus(doc.job_status)
+                        ? 'cursor-pointer hover:bg-muted/50'
+                        : 'cursor-not-allowed opacity-60'
+                    )}
+                    onClick={() => {
+                      if (!isClickableStatus(doc.job_status)) {
+                        return;
+                      }
+                      navigate(`/documents/${doc.uuid}`);
+                    }}
+                    onKeyDown={(event) => {
+                      if (!isClickableStatus(doc.job_status)) {
+                        return;
+                      }
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        navigate(`/documents/${doc.uuid}`);
+                      }
+                    }}
+                    tabIndex={isClickableStatus(doc.job_status) ? 0 : -1}
+                    aria-disabled={!isClickableStatus(doc.job_status)}
+                  >
                     <TableCell className="font-mono text-sm">
                       {doc.uuid}
                     </TableCell>

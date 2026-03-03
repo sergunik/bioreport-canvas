@@ -16,18 +16,30 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { diagnosticReportService, observationService, ApiClientError } from '@/api';
+import { cn } from '@/lib/utils';
+import type { ObservationValueType, StoreObservationRequest } from '@/types/api';
 
 interface ObservationRow {
   id: string;
   name: string;
+  valueType: ObservationValueType | '';
   value: string;
   unit: string;
   referenceRangeMin: string;
   referenceRangeMax: string;
   referenceUnit: string;
 }
+
+const markerTypeOptions: ObservationValueType[] = ['numeric', 'boolean', 'text'];
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9);
@@ -36,12 +48,69 @@ function generateId() {
 const initialObservation: ObservationRow = {
   id: generateId(),
   name: '',
+  valueType: 'numeric',
   value: '',
   unit: '',
   referenceRangeMin: '',
   referenceRangeMax: '',
   referenceUnit: '',
 };
+
+function parseNumeric(rawValue: string): number | null {
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return null;
+  }
+  const numericValue = Number(trimmed);
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function parseBoolean(rawValue: string): boolean | null {
+  const normalized = rawValue.trim().toLowerCase();
+  if (normalized === 'true' || normalized === '1') {
+    return true;
+  }
+  if (normalized === 'false' || normalized === '0') {
+    return false;
+  }
+  return null;
+}
+
+function parseObservationPayload(
+  rawValue: string,
+  preferredType: ObservationValueType | ''
+): { value_type: ObservationValueType; value: number | boolean | string } | null {
+  const trimmed = rawValue.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (preferredType === 'numeric') {
+    const numericValue = parseNumeric(trimmed);
+    return numericValue === null ? null : { value_type: 'numeric', value: numericValue };
+  }
+
+  if (preferredType === 'boolean') {
+    const booleanValue = parseBoolean(trimmed);
+    return booleanValue === null ? null : { value_type: 'boolean', value: booleanValue };
+  }
+
+  if (preferredType === 'text') {
+    return { value_type: 'text', value: trimmed };
+  }
+
+  const inferredBoolean = parseBoolean(trimmed);
+  if (inferredBoolean !== null) {
+    return { value_type: 'boolean', value: inferredBoolean };
+  }
+
+  const inferredNumber = parseNumeric(trimmed);
+  if (inferredNumber !== null) {
+    return { value_type: 'numeric', value: inferredNumber };
+  }
+
+  return { value_type: 'text', value: trimmed };
+}
 
 export default function NewDiagnosticReport() {
   const navigate = useNavigate();
@@ -52,8 +121,15 @@ export default function NewDiagnosticReport() {
     { ...initialObservation, id: generateId() },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const [rowsError, setRowsError] = useState<string | null>(null);
+  const [invalidValueRowIds, setInvalidValueRowIds] = useState<string[]>([]);
+  const [invalidUnitRowIds, setInvalidUnitRowIds] = useState<string[]>([]);
+  const [invalidReferenceRowIds, setInvalidReferenceRowIds] = useState<string[]>([]);
+  const showNumericColumns = observations.some((obs) => obs.valueType === 'numeric');
 
   const addObservation = () => {
+    setRowsError(null);
     setObservations((prev) => [
       ...prev,
       { ...initialObservation, id: generateId() },
@@ -62,6 +138,9 @@ export default function NewDiagnosticReport() {
 
   const removeObservation = (id: string) => {
     if (observations.length <= 1) return;
+    setInvalidValueRowIds((prev) => prev.filter((rowId) => rowId !== id));
+    setInvalidUnitRowIds((prev) => prev.filter((rowId) => rowId !== id));
+    setInvalidReferenceRowIds((prev) => prev.filter((rowId) => rowId !== id));
     setObservations((prev) => prev.filter((o) => o.id !== id));
   };
 
@@ -70,15 +149,68 @@ export default function NewDiagnosticReport() {
     field: keyof ObservationRow,
     value: string
   ) => {
+    if (field === 'value') {
+      setInvalidValueRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setInvalidUnitRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setInvalidReferenceRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setRowsError(null);
+    }
+    if (field === 'unit') {
+      setInvalidUnitRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setRowsError(null);
+    }
+    if (field === 'referenceRangeMin' || field === 'referenceRangeMax' || field === 'referenceUnit') {
+      setInvalidReferenceRowIds((prev) => prev.filter((rowId) => rowId !== id));
+      setRowsError(null);
+    }
     setObservations((prev) =>
       prev.map((o) => (o.id === id ? { ...o, [field]: value } : o))
     );
   };
 
+  const updateObservationType = (id: string, valueType: ObservationValueType) => {
+    setInvalidValueRowIds((prev) => prev.filter((rowId) => rowId !== id));
+    setInvalidUnitRowIds((prev) => prev.filter((rowId) => rowId !== id));
+    setInvalidReferenceRowIds((prev) => prev.filter((rowId) => rowId !== id));
+    setRowsError(null);
+
+    setObservations((prev) =>
+      prev.map((row) => {
+        if (row.id !== id) {
+          return row;
+        }
+        if (valueType === 'numeric') {
+          return { ...row, valueType };
+        }
+        return {
+          ...row,
+          valueType,
+          referenceRangeMin: '',
+          referenceRangeMax: '',
+          referenceUnit: '',
+          value:
+            valueType === 'boolean' &&
+            (row.value.trim().toLowerCase() === 'true' ||
+              row.value.trim().toLowerCase() === 'false')
+              ? row.value.trim().toLowerCase()
+              : valueType === 'boolean'
+                ? ''
+                : row.value,
+        };
+      })
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTitleError(null);
+    setRowsError(null);
+    setInvalidValueRowIds([]);
+    setInvalidUnitRowIds([]);
+    setInvalidReferenceRowIds([]);
 
     if (!title.trim()) {
+      setTitleError('Please provide a report title.');
       toast({
         title: 'Validation Error',
         description: 'Please provide a report title.',
@@ -91,6 +223,7 @@ export default function NewDiagnosticReport() {
       (o) => o.name.trim() && o.value.trim()
     );
     if (validObservations.length === 0) {
+      setRowsError('Please add at least one observation with a name and value.');
       toast({
         title: 'Validation Error',
         description: 'Please add at least one observation with a name and value.',
@@ -99,10 +232,101 @@ export default function NewDiagnosticReport() {
       return;
     }
 
-    if (validObservations.some((o) => Number.isNaN(Number(o.value)))) {
+    const parsedRows = validObservations
+      .map((row) => ({ row, parsed: parseObservationPayload(row.value, row.valueType) }))
+      .filter((entry) => entry.parsed !== null);
+
+    if (parsedRows.length === 0) {
+      setInvalidValueRowIds(
+        validObservations.map((o) => o.id)
+      );
+      setRowsError('Observation value type is invalid for the provided value.');
       toast({
         title: 'Validation Error',
-        description: 'Observation value must be a valid number.',
+        description: 'Observation value type is invalid for the provided value.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const payloads: Array<{ rowId: string; payload: StoreObservationRequest }> = [];
+    const nextInvalidUnitRowIds: string[] = [];
+    const nextInvalidReferenceRowIds: string[] = [];
+
+    for (const entry of parsedRows) {
+      const { row, parsed } = entry;
+      const unit = row.unit.trim();
+      const hasReferenceInput = Boolean(
+        row.referenceRangeMin.trim() || row.referenceRangeMax.trim() || row.referenceUnit.trim()
+      );
+
+      if (parsed.value_type === 'numeric') {
+        if (!unit) {
+          nextInvalidUnitRowIds.push(row.id);
+          continue;
+        }
+
+        const min = row.referenceRangeMin.trim() ? parseNumeric(row.referenceRangeMin) : null;
+        const max = row.referenceRangeMax.trim() ? parseNumeric(row.referenceRangeMax) : null;
+        if (
+          (row.referenceRangeMin.trim() && min === null) ||
+          (row.referenceRangeMax.trim() && max === null)
+        ) {
+          nextInvalidReferenceRowIds.push(row.id);
+          continue;
+        }
+
+        payloads.push({
+          rowId: row.id,
+          payload: {
+            biomarker_name: row.name.trim(),
+            value_type: 'numeric',
+            value: parsed.value,
+            unit,
+            reference_range_min: min,
+            reference_range_max: max,
+            reference_unit: row.referenceUnit.trim() || null,
+          },
+        });
+        continue;
+      }
+
+      if (hasReferenceInput) {
+        nextInvalidReferenceRowIds.push(row.id);
+        continue;
+      }
+
+      payloads.push({
+        rowId: row.id,
+        payload: {
+          biomarker_name: row.name.trim(),
+          value_type: parsed.value_type,
+          value: parsed.value,
+          unit: unit || null,
+          reference_range_min: null,
+          reference_range_max: null,
+          reference_unit: null,
+        },
+      });
+    }
+
+    if (nextInvalidUnitRowIds.length > 0) {
+      setInvalidUnitRowIds(nextInvalidUnitRowIds);
+      setRowsError('Unit is required for numeric observations.');
+      toast({
+        title: 'Validation Error',
+        description: 'Unit is required for numeric observations.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (nextInvalidReferenceRowIds.length > 0) {
+      setInvalidReferenceRowIds(nextInvalidReferenceRowIds);
+      setRowsError('Reference ranges are allowed only for numeric observations.');
+      toast({
+        title: 'Validation Error',
+        description: 'Reference ranges are allowed only for numeric observations.',
         variant: 'destructive',
       });
       return;
@@ -115,23 +339,23 @@ export default function NewDiagnosticReport() {
         notes: notes.trim() || null,
       });
 
-      for (const obs of validObservations) {
-        const numValue = Number(obs.value);
-        const min = obs.referenceRangeMin.trim()
-          ? Number(obs.referenceRangeMin)
-          : null;
-        const max = obs.referenceRangeMax.trim()
-          ? Number(obs.referenceRangeMax)
-          : null;
-        await observationService.create(report.id, {
-          biomarker_name: obs.name.trim(),
-          value: numValue,
-          unit: obs.unit.trim() || '',
-          reference_range_min: min !== null && !Number.isNaN(min) ? min : null,
-          reference_range_max: max !== null && !Number.isNaN(max) ? max : null,
-          reference_unit: obs.referenceUnit.trim() || null,
-        });
-      }
+      await observationService.createBatch(report.id, {
+        observations: payloads.map((entry) => entry.payload),
+      });
+
+      setObservations((prev) =>
+        prev.map((row) => {
+          const matched = payloads.find((entry) => entry.rowId === row.id);
+          if (!matched) {
+            return row;
+          }
+          return {
+            ...row,
+            valueType: matched.payload.value_type ?? row.valueType,
+            unit: matched.payload.unit ?? '',
+          };
+        })
+      );
 
       toast({
         title: 'Report Created',
@@ -139,8 +363,70 @@ export default function NewDiagnosticReport() {
       });
       navigate(`/diagnostic-reports/${report.id}`);
     } catch (err) {
-      const message =
-        err instanceof ApiClientError ? err.getFirstError() : 'An error occurred';
+      let message = 'An error occurred';
+      if (err instanceof ApiClientError) {
+        message = err.getFirstError();
+
+        if (err.isValidationError()) {
+          const fieldErrors = err.getFieldErrors();
+          const backendInvalidValueRows = new Set<string>();
+          const backendInvalidUnitRows = new Set<string>();
+          const backendInvalidReferenceRows = new Set<string>();
+
+          Object.keys(fieldErrors).forEach((fieldKey) => {
+            const match = fieldKey.match(/^observations\.(\d+)\.(.+)$/);
+            if (match) {
+              const rowId = payloads[Number(match[1])]?.rowId;
+              const nestedField = match[2];
+              if (!rowId) {
+                return;
+              }
+              if (nestedField === 'value' || nestedField === 'value_type') {
+                backendInvalidValueRows.add(rowId);
+              }
+              if (nestedField === 'unit') {
+                backendInvalidUnitRows.add(rowId);
+              }
+              if (
+                nestedField === 'reference_range_min' ||
+                nestedField === 'reference_range_max' ||
+                nestedField === 'reference_unit'
+              ) {
+                backendInvalidReferenceRows.add(rowId);
+              }
+              return;
+            }
+
+            if (fieldKey === 'value' || fieldKey === 'value_type') {
+              payloads.forEach((entry) => backendInvalidValueRows.add(entry.rowId));
+            }
+            if (fieldKey === 'unit') {
+              payloads.forEach((entry) => backendInvalidUnitRows.add(entry.rowId));
+            }
+            if (
+              fieldKey === 'reference_range_min' ||
+              fieldKey === 'reference_range_max' ||
+              fieldKey === 'reference_unit'
+            ) {
+              payloads.forEach((entry) => backendInvalidReferenceRows.add(entry.rowId));
+            }
+          });
+
+          if (backendInvalidValueRows.size > 0) {
+            setInvalidValueRowIds(Array.from(backendInvalidValueRows));
+          }
+          if (backendInvalidUnitRows.size > 0) {
+            setInvalidUnitRowIds(Array.from(backendInvalidUnitRows));
+          }
+          if (backendInvalidReferenceRows.size > 0) {
+            setInvalidReferenceRowIds(Array.from(backendInvalidReferenceRows));
+          }
+          if (message) {
+            setRowsError(message);
+          }
+        }
+      }
+
       toast({
         title: 'Error',
         description: message,
@@ -179,8 +465,14 @@ export default function NewDiagnosticReport() {
                   id="title"
                   placeholder="e.g., Blood Test - January 2026"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => {
+                    setTitle(e.target.value);
+                    setTitleError(null);
+                  }}
+                  aria-invalid={!!titleError}
+                  className={cn(titleError && 'border-destructive')}
                 />
+                {titleError && <p className="text-sm text-destructive">{titleError}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes (optional)</Label>
@@ -221,11 +513,16 @@ export default function NewDiagnosticReport() {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="min-w-[180px]">Biomarker Name</TableHead>
+                      <TableHead className="min-w-[150px]">Marker Type</TableHead>
                       <TableHead className="min-w-[100px]">Value</TableHead>
-                      <TableHead className="min-w-[100px]">Unit</TableHead>
-                      <TableHead className="min-w-[100px]">Ref. Min</TableHead>
-                      <TableHead className="min-w-[100px]">Ref. Max</TableHead>
-                      <TableHead className="min-w-[80px]">Ref. Unit</TableHead>
+                      {showNumericColumns && (
+                        <>
+                          <TableHead className="min-w-[100px]">Unit</TableHead>
+                          <TableHead className="min-w-[100px]">Ref. Min</TableHead>
+                          <TableHead className="min-w-[100px]">Ref. Max</TableHead>
+                          <TableHead className="min-w-[80px]">Ref. Unit</TableHead>
+                        </>
+                      )}
                       <TableHead className="w-[50px]" />
                     </TableRow>
                   </TableHeader>
@@ -242,62 +539,149 @@ export default function NewDiagnosticReport() {
                           />
                         </TableCell>
                         <TableCell>
-                          <Input
-                            placeholder="e.g., 14.5"
-                            value={obs.value}
-                            onChange={(e) =>
-                              updateObservation(obs.id, 'value', e.target.value)
+                          <Select
+                            value={obs.valueType || 'numeric'}
+                            onValueChange={(nextType) =>
+                              updateObservationType(obs.id, nextType as ObservationValueType)
                             }
-                          />
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {markerTypeOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option === 'numeric'
+                                    ? 'Numeric'
+                                    : option === 'boolean'
+                                      ? 'Positive / Negative'
+                                      : 'Text'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell>
-                          <Input
-                            placeholder="e.g., g/dL"
-                            value={obs.unit}
-                            onChange={(e) =>
-                              updateObservation(obs.id, 'unit', e.target.value)
-                            }
-                          />
+                          {obs.valueType === 'boolean' ? (
+                            <Select
+                              value={obs.value.toLowerCase()}
+                              onValueChange={(nextValue) =>
+                                updateObservation(obs.id, 'value', nextValue)
+                              }
+                            >
+                              <SelectTrigger
+                                aria-invalid={invalidValueRowIds.includes(obs.id)}
+                                className={cn(
+                                  invalidValueRowIds.includes(obs.id) && 'border-destructive'
+                                )}
+                              >
+                                <SelectValue placeholder="Result" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="true">Positive</SelectItem>
+                                <SelectItem value="false">Negative</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              placeholder={
+                                obs.valueType === 'text' ? 'e.g., Detected' : 'e.g., 14.5'
+                              }
+                              value={obs.value}
+                              onChange={(e) =>
+                                updateObservation(obs.id, 'value', e.target.value)
+                              }
+                              aria-invalid={invalidValueRowIds.includes(obs.id)}
+                              className={cn(
+                                invalidValueRowIds.includes(obs.id) && 'border-destructive'
+                              )}
+                            />
+                          )}
                         </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="e.g., 12"
-                            value={obs.referenceRangeMin}
-                            onChange={(e) =>
-                              updateObservation(
-                                obs.id,
-                                'referenceRangeMin',
-                                e.target.value
-                              )
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="e.g., 17.5"
-                            value={obs.referenceRangeMax}
-                            onChange={(e) =>
-                              updateObservation(
-                                obs.id,
-                                'referenceRangeMax',
-                                e.target.value
-                              )
-                            }
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            placeholder="e.g., g/dL"
-                            value={obs.referenceUnit}
-                            onChange={(e) =>
-                              updateObservation(
-                                obs.id,
-                                'referenceUnit',
-                                e.target.value
-                              )
-                            }
-                          />
-                        </TableCell>
+                        {showNumericColumns && (
+                          <>
+                            <TableCell>
+                              {obs.valueType === 'numeric' ? (
+                                <Input
+                                  placeholder="e.g., g/dL"
+                                  value={obs.unit}
+                                  onChange={(e) =>
+                                    updateObservation(obs.id, 'unit', e.target.value)
+                                  }
+                                  aria-invalid={invalidUnitRowIds.includes(obs.id)}
+                                  className={cn(
+                                    invalidUnitRowIds.includes(obs.id) && 'border-destructive'
+                                  )}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {obs.valueType === 'numeric' ? (
+                                <Input
+                                  placeholder="e.g., 12"
+                                  value={obs.referenceRangeMin}
+                                  onChange={(e) =>
+                                    updateObservation(
+                                      obs.id,
+                                      'referenceRangeMin',
+                                      e.target.value
+                                    )
+                                  }
+                                  aria-invalid={invalidReferenceRowIds.includes(obs.id)}
+                                  className={cn(
+                                    invalidReferenceRowIds.includes(obs.id) && 'border-destructive'
+                                  )}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {obs.valueType === 'numeric' ? (
+                                <Input
+                                  placeholder="e.g., 17.5"
+                                  value={obs.referenceRangeMax}
+                                  onChange={(e) =>
+                                    updateObservation(
+                                      obs.id,
+                                      'referenceRangeMax',
+                                      e.target.value
+                                    )
+                                  }
+                                  aria-invalid={invalidReferenceRowIds.includes(obs.id)}
+                                  className={cn(
+                                    invalidReferenceRowIds.includes(obs.id) && 'border-destructive'
+                                  )}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {obs.valueType === 'numeric' ? (
+                                <Input
+                                  placeholder="e.g., g/dL"
+                                  value={obs.referenceUnit}
+                                  onChange={(e) =>
+                                    updateObservation(
+                                      obs.id,
+                                      'referenceUnit',
+                                      e.target.value
+                                    )
+                                  }
+                                  aria-invalid={invalidReferenceRowIds.includes(obs.id)}
+                                  className={cn(
+                                    invalidReferenceRowIds.includes(obs.id) && 'border-destructive'
+                                  )}
+                                />
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          </>
+                        )}
                         <TableCell>
                           <Button
                             type="button"
@@ -315,6 +699,7 @@ export default function NewDiagnosticReport() {
                   </TableBody>
                 </Table>
               </div>
+              {rowsError && <p className="mt-4 text-sm text-destructive">{rowsError}</p>}
             </CardContent>
           </Card>
 

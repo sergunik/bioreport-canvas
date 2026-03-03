@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom";
+import { vi } from "vitest";
 
 const formatConsoleMsg = (args: unknown[]) =>
   args.map((a) => (typeof a === "string" ? a : String(a))).join(" ");
@@ -57,3 +58,13 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: () => {},
   }),
 });
+
+vi.mock("react-pdf", () => ({
+  pdfjs: {
+    GlobalWorkerOptions: {
+      workerSrc: "",
+    },
+  },
+  Document: ({ children }: { children: unknown }) => children,
+  Page: () => null,
+}));

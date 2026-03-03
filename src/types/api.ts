@@ -107,8 +107,9 @@ export interface ObservationResource {
   id: number;
   biomarker_name: string;
   biomarker_code: string | null;
-  value: number;
-  unit: string;
+  value_type: ObservationValueType;
+  value: number | boolean | string;
+  unit: string | null;
   reference_range_min: number | null;
   reference_range_max: number | null;
   reference_unit: string | null;
@@ -134,14 +135,21 @@ export interface StoreDiagnosticReportRequest {
   notes?: string | null;
 }
 
+export type ObservationValueType = 'numeric' | 'boolean' | 'text';
+
 export interface StoreObservationRequest {
   biomarker_name: string;
   biomarker_code?: string | null;
-  value: number;
-  unit: string;
+  value_type?: ObservationValueType;
+  value: number | boolean | string;
+  unit?: string | null;
   reference_range_min?: number | null;
   reference_range_max?: number | null;
   reference_unit?: string | null;
+}
+
+export interface StoreObservationBatchRequest {
+  observations: StoreObservationRequest[];
 }
 
 // ==================== Document Types ====================
@@ -164,6 +172,58 @@ export interface DocumentListResponse {
 
 export interface DocumentStoreResponse {
   uuid: string;
+}
+
+export interface DocumentMarkerValue {
+  type: 'numeric' | 'boolean' | 'text';
+  number: number | null;
+  unit: string | null;
+  value: boolean | null;
+  text: string | null;
+}
+
+export interface DocumentReferenceRange {
+  min: number | null;
+  max: number | null;
+  unit: string;
+}
+
+export interface DocumentFinalResultMarker {
+  code: string;
+  name: string;
+  value: DocumentMarkerValue;
+  reference_range: DocumentReferenceRange | null;
+}
+
+export interface DocumentFinalResultPerson {
+  name: string;
+  dob: string | null;
+}
+
+export interface DocumentFinalResult {
+  person: DocumentFinalResultPerson;
+  diagnostic_date: string | null;
+  language: string | null;
+  markers: DocumentFinalResultMarker[];
+  pii: string[];
+}
+
+export interface DocumentMetadataResource {
+  uuid: string;
+  file_size_bytes: number;
+  mime_type: string;
+  processed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  status: DocumentJobStatus;
+  error_message: string | null;
+  job_status: DocumentJobStatus;
+  parsed_result: unknown | null;
+  anonymised_result: unknown | null;
+  anonymised_artifacts: unknown[] | null;
+  normalized_result: unknown[] | null;
+  transliteration_mapping: unknown[] | null;
+  final_result: unknown | null;
 }
 
 // ==================== Error Types ====================

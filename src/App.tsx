@@ -21,6 +21,7 @@ import NewDiagnosticReport from "@/pages/NewDiagnosticReport";
 import DiagnosticReportDetail from "@/pages/DiagnosticReportDetail";
 import DocumentsList from "@/pages/DocumentsList";
 import DocumentUpload from "@/pages/DocumentUpload";
+import DocumentDetails from "@/pages/DocumentDetails";
 import Settings from "@/pages/Settings";
 import {
   ProfileSettingsPage,
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/diagnostic-reports/:id" element={<DiagnosticReportDetail />} />
               <Route path="/documents" element={<DocumentsList />} />
               <Route path="/documents/upload" element={<DocumentUpload />} />
+              <Route path="/documents/:uuid" element={<DocumentDetails />} />
               <Route path="/settings" element={<Settings />}>
                 <Route index element={<Navigate to="/settings/profile" replace />} />
                 <Route path="profile" element={<ProfileSettingsPage />} />
