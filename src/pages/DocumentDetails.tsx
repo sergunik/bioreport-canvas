@@ -692,30 +692,13 @@ export default function DocumentDetails() {
       setPdfObjectUrl(null);
 
       try {
-        const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
-        const response = await fetch(`${apiBaseUrl}/documents/${uuid}`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            Accept: 'application/pdf',
-          },
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch PDF (${response.status})`);
+        const pdfBlob = await documentService.getPdf(uuid, controller.signal);
+        if (!pdfBlob.type.includes('pdf')) {
+          throw new Error(`Unexpected content type: ${pdfBlob.type || 'unknown'}`);
         }
-
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('pdf')) {
-          throw new Error(`Unexpected content type: ${contentType || 'unknown'}`);
-        }
-
-        const pdfBytes = new Uint8Array(await response.arrayBuffer());
-        if (pdfBytes.length === 0) {
+        if (pdfBlob.size === 0) {
           throw new Error('Empty PDF response');
         }
-        const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
         const objectUrl = URL.createObjectURL(pdfBlob);
         pdfObjectUrlRef.current = objectUrl;
         setPdfObjectUrl(objectUrl);

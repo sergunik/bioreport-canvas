@@ -20,6 +20,13 @@ export const documentService = {
     return api.get<DocumentMetadataResource>(`/documents/${uuid}/metadata`);
   },
 
+  getPdf: async (uuid: string, signal?: AbortSignal): Promise<Blob> => {
+    return api.getBlob(`/documents/${uuid}`, {
+      headers: { Accept: 'application/pdf' },
+      signal,
+    });
+  },
+
   delete: async (uuid: string): Promise<void> => {
     await api.delete<void>(`/documents/${uuid}`);
   },
