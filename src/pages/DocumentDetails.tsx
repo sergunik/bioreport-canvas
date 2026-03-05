@@ -563,10 +563,10 @@ export default function DocumentDetails() {
           const backendInvalidReferenceRows = new Set<string>();
           let firstBackendError: string | null = null;
 
-          Object.entries(fieldErrors).forEach(([fieldKey, messages]) => {
+          for (const [fieldKey, messages] of Object.entries(fieldErrors)) {
             const message = messages?.[0];
             if (!message) {
-              return;
+              continue;
             }
             if (!firstBackendError) {
               firstBackendError = message;
@@ -578,7 +578,7 @@ export default function DocumentDetails() {
               const nestedField = match[2];
               const rowId = payloads[observationIndex]?.rowId;
               if (!rowId) {
-                return;
+                continue;
               }
 
               if (nestedField === 'value' || nestedField === 'value_type') {
@@ -594,7 +594,7 @@ export default function DocumentDetails() {
               ) {
                 backendInvalidReferenceRows.add(rowId);
               }
-              return;
+              continue;
             }
 
             if (fieldKey === 'value' || fieldKey === 'value_type') {
@@ -610,7 +610,7 @@ export default function DocumentDetails() {
             ) {
               payloads.forEach((entry) => backendInvalidReferenceRows.add(entry.rowId));
             }
-          });
+          }
 
           if (backendInvalidValueRows.size > 0) {
             setInvalidValueRowIds(Array.from(backendInvalidValueRows));

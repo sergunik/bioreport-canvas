@@ -373,13 +373,13 @@ export default function NewDiagnosticReport() {
           const backendInvalidUnitRows = new Set<string>();
           const backendInvalidReferenceRows = new Set<string>();
 
-          Object.keys(fieldErrors).forEach((fieldKey) => {
+          for (const fieldKey of Object.keys(fieldErrors)) {
             const match = fieldKey.match(/^observations\.(\d+)\.(.+)$/);
             if (match) {
               const rowId = payloads[Number(match[1])]?.rowId;
               const nestedField = match[2];
               if (!rowId) {
-                return;
+                continue;
               }
               if (nestedField === 'value' || nestedField === 'value_type') {
                 backendInvalidValueRows.add(rowId);
@@ -394,23 +394,23 @@ export default function NewDiagnosticReport() {
               ) {
                 backendInvalidReferenceRows.add(rowId);
               }
-              return;
+              continue;
             }
 
             if (fieldKey === 'value' || fieldKey === 'value_type') {
-              payloads.forEach((entry) => backendInvalidValueRows.add(entry.rowId));
+              for (const entry of payloads) backendInvalidValueRows.add(entry.rowId);
             }
             if (fieldKey === 'unit') {
-              payloads.forEach((entry) => backendInvalidUnitRows.add(entry.rowId));
+              for (const entry of payloads) backendInvalidUnitRows.add(entry.rowId);
             }
             if (
               fieldKey === 'reference_range_min' ||
               fieldKey === 'reference_range_max' ||
               fieldKey === 'reference_unit'
             ) {
-              payloads.forEach((entry) => backendInvalidReferenceRows.add(entry.rowId));
+              for (const entry of payloads) backendInvalidReferenceRows.add(entry.rowId);
             }
-          });
+          }
 
           if (backendInvalidValueRows.size > 0) {
             setInvalidValueRowIds(Array.from(backendInvalidValueRows));
