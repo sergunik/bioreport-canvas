@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,6 +36,7 @@ export default function ProfileSettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const isMountedRef = useRef(true);
 
   const {
     register,
@@ -54,9 +55,13 @@ export default function ProfileSettingsPage() {
   });
 
   useEffect(() => {
+    isMountedRef.current = true;
     const fetchProfile = async () => {
       try {
         const data = await profileService.getProfile();
+        if (!isMountedRef.current) {
+          return;
+        }
         setProfile(data);
         reset({
           nickname: data.nickname || '',
@@ -64,6 +69,9 @@ export default function ProfileSettingsPage() {
           timezone: data.timezone || 'UTC',
         });
       } catch (error) {
+        if (!isMountedRef.current) {
+          return;
+        }
         if (error instanceof ApiClientError) {
           toast({
             variant: 'destructive',
@@ -72,11 +80,16 @@ export default function ProfileSettingsPage() {
           });
         }
       } finally {
-        setIsFetching(false);
+        if (isMountedRef.current) {
+          setIsFetching(false);
+        }
       }
     };
 
     fetchProfile();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [reset, toast, t]);
 
   const onSubmit = async (data: ProfileFormData) => {
@@ -90,6 +103,9 @@ export default function ProfileSettingsPage() {
       });
 
       const updatedProfile = await profileService.getProfile();
+      if (!isMountedRef.current) {
+        return;
+      }
       setProfile(updatedProfile);
       reset({
         nickname: updatedProfile.nickname || '',
@@ -102,6 +118,9 @@ export default function ProfileSettingsPage() {
         description: t('settings.profile.saved'),
       });
     } catch (error) {
+      if (!isMountedRef.current) {
+        return;
+      }
       if (error instanceof ApiClientError) {
         if (error.isValidationError()) {
           const fieldErrors = error.getFieldErrors();
@@ -125,7 +144,9 @@ export default function ProfileSettingsPage() {
         });
       }
     } finally {
-      setIsLoading(false);
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
     }
   };
 

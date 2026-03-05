@@ -30,6 +30,13 @@ function formatDate(iso: string) {
   }
 }
 
+function formatObservationValue(value: number | boolean | string): string {
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+  return String(value);
+}
+
 export default function DiagnosticReportDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -164,8 +171,8 @@ export default function DiagnosticReportDetail() {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell>{obs.value}</TableCell>
-                          <TableCell>{obs.unit}</TableCell>
+                          <TableCell>{formatObservationValue(obs.value)}</TableCell>
+                          <TableCell>{obs.unit || '—'}</TableCell>
                           <TableCell>{refRange}</TableCell>
                         </TableRow>
                       );

@@ -100,4 +100,52 @@ describe('DocumentsList', () => {
     fireEvent.click(screen.getByText('documents.list.uploadFirst'));
     expect(mockNavigate).toHaveBeenCalledWith('/documents/upload');
   });
+
+  it('navigates to details for done and failed rows only', async () => {
+    mockList.mockResolvedValue({
+      data: [
+        {
+          uuid: 'doc-done',
+          file_size_bytes: 1024,
+          mime_type: 'application/pdf',
+          processed_at: null,
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          job_status: 'done',
+        },
+        {
+          uuid: 'doc-failed',
+          file_size_bytes: 1024,
+          mime_type: 'application/pdf',
+          processed_at: null,
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          job_status: 'failed',
+        },
+        {
+          uuid: 'doc-pending',
+          file_size_bytes: 1024,
+          mime_type: 'application/pdf',
+          processed_at: null,
+          created_at: '2025-01-01T00:00:00.000Z',
+          updated_at: '2025-01-01T00:00:00.000Z',
+          job_status: 'pending',
+        },
+      ],
+    });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText('doc-done')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('doc-done'));
+    fireEvent.click(screen.getByText('doc-failed'));
+    fireEvent.click(screen.getByText('doc-pending'));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/documents/doc-done');
+    expect(mockNavigate).toHaveBeenCalledWith('/documents/doc-failed');
+    expect(mockNavigate).not.toHaveBeenCalledWith('/documents/doc-pending');
+  });
 });

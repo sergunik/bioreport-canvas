@@ -82,22 +82,11 @@ async function refreshAccessToken(): Promise<boolean> {
   }
 }
 
-export async function apiClient<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const isFormData = options.body instanceof FormData;
-  const headers: HeadersInit = {
-    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-    'Accept': 'application/json',
-    ...options.headers,
-  };
-
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}): Promise<Response> {
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
   let response = await fetch(url, {
     ...options,
-    headers,
     credentials: 'include',
   });
 
@@ -109,7 +98,7 @@ export async function apiClient<T>(
 
       if (refreshed) {
         drainRefreshQueue();
-        response = await fetch(url, { ...options, headers, credentials: 'include' });
+        response = await fetch(url, { ...options, credentials: 'include' });
       } else {
         const err = new ApiClientError({ status: 401, message: 'Session expired' });
         drainRefreshQueue(err);
@@ -119,9 +108,25 @@ export async function apiClient<T>(
       await new Promise<void>((resolve, reject) => {
         refreshQueue.push({ resolve, reject });
       });
-      response = await fetch(url, { ...options, headers, credentials: 'include' });
+      response = await fetch(url, { ...options, credentials: 'include' });
     }
   }
+
+  return response;
+}
+
+export async function apiClient<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const isFormData = options.body instanceof FormData;
+  const headers: HeadersInit = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    'Accept': 'application/json',
+    ...options.headers,
+  };
+
+  const response = await fetchWithAuth(endpoint, { ...options, headers });
 
   if (!response.ok) {
     const error = await parseErrorResponse(response);
@@ -136,9 +141,27 @@ export async function apiClient<T>(
   return response.json();
 }
 
+async function getBlobClient(endpoint: string, options: RequestInit = {}): Promise<Blob> {
+  const response = await fetchWithAuth(endpoint, {
+    ...options,
+    method: 'GET',
+    headers: { ...options.headers },
+  });
+
+  if (!response.ok) {
+    const error = await parseErrorResponse(response);
+    throw new ApiClientError(error);
+  }
+
+  return response.blob();
+}
+
 export const api = {
   get: <T>(endpoint: string, options?: RequestInit) =>
     apiClient<T>(endpoint, { ...options, method: 'GET' }),
+
+  getBlob: (endpoint: string, options?: RequestInit) =>
+    getBlobClient(endpoint, options),
 
   post: <T>(endpoint: string, data?: unknown, options?: RequestInit) =>
     apiClient<T>(endpoint, {
