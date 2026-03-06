@@ -131,6 +131,22 @@ export default function DiagnosticReportDetail() {
           </Card>
         )}
 
+        {report.document_uuids && report.document_uuids.length > 0 && (
+          <Card className="mb-8">
+            <CardContent className="pt-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Attached Documents</h2>
+              <ul className="space-y-2">
+                {report.document_uuids.map((uuid) => (
+                  <li key={uuid} className="text-sm text-muted-foreground flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary/40" />
+                    {uuid}.pdf
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Loader2, Plus, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
@@ -36,7 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { diagnosticReportService, observationService, documentService, ApiClientError } from '@/api';
+import { diagnosticReportService, documentService, ApiClientError } from '@/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import type {
@@ -45,7 +45,7 @@ import type {
   DocumentJobStatus,
   DocumentMetadataResource,
   ObservationValueType,
-  StoreObservationRequest,
+  StoreDocumentExtractionObservationRequest,
 } from '@/types/api';
 
 interface ObservationRow {
@@ -282,6 +282,12 @@ export default function DocumentDetails() {
     enabled: Boolean(uuid),
   });
 
+  const reportsQuery = useQuery({
+    queryKey: ['diagnostic-reports'],
+    queryFn: () => diagnosticReportService.list(),
+    enabled: Boolean(uuid),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (documentUuid: string) => documentService.delete(documentUuid),
     onSuccess: async () => {
@@ -310,7 +316,16 @@ export default function DocumentDetails() {
   });
 
   const metadata = metadataQuery.data;
+  const finalResult =
+    metadata && isFinalResult(metadata.final_result) ? metadata.final_result : null;
+  const reports = reportsQuery.data?.data ?? [];
+  const linkedReports = uuid
+    ? reports.filter((r) => (r.document_uuids ?? []).includes(uuid))
+    : [];
+  const isReportCreated = linkedReports.length > 0;
   const documentStatus = metadata ? toStatus(metadata) : null;
+  const leftCardRef = useRef<HTMLDivElement>(null);
+  const rightCardRef = useRef<HTMLDivElement>(null);
   const isDone = documentStatus === 'done';
   const isFailed = documentStatus === 'failed';
   const isPendingOrProcessing = documentStatus === 'pending' || documentStatus === 'processing';
@@ -432,7 +447,7 @@ export default function DocumentDetails() {
       });
       return;
     }
-    const payloads: Array<{ rowId: string; payload: StoreObservationRequest }> = [];
+    const payloads: Array<{ rowId: string; payload: StoreDocumentExtractionObservationRequest }> = [];
     const nextInvalidUnitRowIds: string[] = [];
     const nextInvalidReferenceRowIds: string[] = [];
 
@@ -465,7 +480,7 @@ export default function DocumentDetails() {
             biomarker_name: row.name.trim(),
             biomarker_code: row.code.trim() || null,
             value_type: 'numeric',
-            value: parsed.value,
+            value: String(parsed.value),
             unit,
             reference_range_min: min,
             reference_range_max: max,
@@ -480,13 +495,16 @@ export default function DocumentDetails() {
         continue;
       }
 
+      const observationValue =
+        parsed.value_type === 'boolean' ? (parsed.value as boolean) : String(parsed.value);
+
       payloads.push({
         rowId: row.id,
         payload: {
           biomarker_name: row.name.trim(),
           biomarker_code: row.code.trim() || null,
           value_type: parsed.value_type,
-          value: parsed.value,
+          value: observationValue,
           unit: unit || null,
           reference_range_min: null,
           reference_range_max: null,
@@ -519,28 +537,12 @@ export default function DocumentDetails() {
 
     setIsSavingReport(true);
     try {
-      const report = await diagnosticReportService.create({
+      const report = await diagnosticReportService.createFromDocumentExtraction({
+        document_uuid: uuid as string,
         title: title.trim() || null,
         notes: notes.trim() || null,
-      });
-
-      await observationService.createBatch(report.id, {
         observations: payloads.map((entry) => entry.payload),
       });
-
-      setObservations((prev) =>
-        prev.map((row) => {
-          const matched = payloads.find((entry) => entry.rowId === row.id);
-          if (!matched) {
-            return row;
-          }
-          return {
-            ...row,
-            valueType: matched.payload.value_type ?? row.valueType,
-            unit: matched.payload.unit ?? '',
-          };
-        })
-      );
 
       if (payloads.length !== filledRows.length) {
         toast({
@@ -650,14 +652,14 @@ export default function DocumentDetails() {
 
     const maybeFinalResult = metadata.final_result;
     if (!isFinalResult(maybeFinalResult)) {
-      setTitle(buildDefaultTitle(uuid, null, formatDate(metadata.created_at)));
+      setTitle(metadata.diagnostic_title ?? buildDefaultTitle(uuid, null, formatDate(metadata.created_at)));
       setObservations([{ ...initialObservation, id: generateId() }]);
       setHasPrefilled(true);
       return;
     }
 
     setTitle(
-      buildDefaultTitle(uuid, maybeFinalResult.diagnostic_date, formatDate(metadata.created_at))
+      metadata.diagnostic_title ?? maybeFinalResult.diagnostic_title ?? buildDefaultTitle(uuid, maybeFinalResult.diagnostic_date, formatDate(metadata.created_at))
     );
     setObservations(
       maybeFinalResult.markers.length > 0
@@ -730,6 +732,19 @@ export default function DocumentDetails() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const left = leftCardRef.current;
+    const right = rightCardRef.current;
+    if (!left || !right || !isDone || typeof ResizeObserver === 'undefined') return;
+    const syncHeight = () => {
+      right.style.height = `${left.offsetHeight}px`;
+    };
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(left);
+    syncHeight();
+    return () => observer.disconnect();
+  }, [isDone, metadata, linkedReports.length]);
 
   if (!uuid) {
     return (
@@ -847,42 +862,189 @@ export default function DocumentDetails() {
           </Card>
         )}
 
-        {isDone && (
-          <div className="grid gap-6 xl:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('documents.details.formTitle')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSave} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="report-title">{t('documents.details.reportTitle')}</Label>
-                    <Input
-                      id="report-title"
-                      value={title}
-                      onChange={(event) => {
-                        setTitle(event.target.value);
-                        setTitleError(null);
-                      }}
-                      placeholder={t('documents.details.reportTitlePlaceholder')}
-                      aria-invalid={!!titleError}
-                      className={cn(titleError && 'border-destructive')}
-                    />
-                    {titleError && <p className="text-sm text-destructive">{titleError}</p>}
+        {linkedReports.length > 0 && (
+          <div className="mb-6 space-y-4">
+            {linkedReports.map((report) => (
+              <Card
+                key={report.id}
+                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => navigate(`/diagnostic-reports/${report.id}`)}
+              >
+                <CardHeader>
+                  <CardTitle>{t('documents.details.linkedReportTitle')}</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">{t('documents.details.linkedReportFieldTitle')}</p>
+                    <p className="font-medium text-sm truncate" title={report.title ?? '—'}>
+                      {report.title ?? '—'}
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="report-notes">{t('documents.details.reportNotes')}</Label>
-                    <Textarea
-                      id="report-notes"
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      placeholder={t('documents.details.reportNotesPlaceholder')}
-                      rows={3}
-                    />
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">{t('documents.details.linkedReportFieldDate')}</p>
+                    <p className="font-medium text-sm">{formatDate(report.created_at)}</p>
                   </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">{t('documents.details.linkedReportFieldObservations')}</p>
+                    <p className="font-medium text-sm">{report.observations?.length ?? 0}</p>
+                  </div>
+                  {report.notes && (
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">{t('documents.details.linkedReportFieldNotes')}</p>
+                      <p className="font-medium text-sm truncate" title={report.notes}>
+                        {report.notes}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">{t('documents.details.formHint')}</p>
+        {isDone && (
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="grid gap-6 xl:grid-cols-2 items-start">
+              <fieldset disabled={isReportCreated} className="contents">
+                <Card ref={leftCardRef}>
+                  <CardHeader>
+                    <CardTitle>{t('documents.details.formTitle')}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="report-title">{t('documents.details.reportTitle')}</Label>
+                      <Input
+                        id="report-title"
+                        value={title}
+                        onChange={(event) => {
+                          setTitle(event.target.value);
+                          setTitleError(null);
+                        }}
+                        placeholder={t('documents.details.reportTitlePlaceholder')}
+                        aria-invalid={!!titleError}
+                        className={cn(titleError && 'border-destructive')}
+                      />
+                      {titleError && <p className="text-sm text-destructive">{titleError}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('documents.details.person')}</Label>
+                      <p className="text-sm text-foreground">
+                        {finalResult?.person?.name ?? '—'}
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t('documents.details.diagnosticDate')}</Label>
+                      <p className="text-sm text-foreground">
+                        {finalResult?.diagnostic_date ? formatDate(finalResult.diagnostic_date) : '—'}
+                      </p>
+                    </div>
+                    {finalResult?.pii?.length ? (
+                      <div className="space-y-2">
+                        <Label>{t('documents.details.possiblySensitiveWords')}</Label>
+                        <div className="space-y-3">
+                          <div className="flex flex-wrap gap-2">
+                            {finalResult.pii.map((word) => (
+                              <Badge key={word} variant="secondary">
+                                {word}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {t('documents.details.possiblySensitiveWordsDescription')}{' '}
+                            <Link
+                              to="/settings/sensitive-words"
+                              className="text-primary underline underline-offset-4 hover:no-underline"
+                            >
+                              {t('documents.details.sensitiveListLink')}
+                            </Link>
+                            .
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+                    <div className="space-y-2">
+                      <Label htmlFor="report-notes">{t('documents.details.reportNotes')}</Label>
+                      <Textarea
+                        id="report-notes"
+                        value={notes}
+                        onChange={(event) => setNotes(event.target.value)}
+                        placeholder={t('documents.details.reportNotesPlaceholder')}
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </fieldset>
+
+              <div ref={rightCardRef} className="min-h-0 overflow-hidden">
+                  <Card className="h-full flex flex-col">
+                    <CardHeader>
+                      <div className="flex items-center justify-between gap-3">
+                        <CardTitle>{t('documents.details.previewTitle')}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setZoom((prev) => Math.max(0.5, Number((prev - 0.1).toFixed(1))))}
+                          >
+                            <ZoomOut className="h-4 w-4" />
+                          </Button>
+                          <span className="min-w-[56px] text-center text-sm text-muted-foreground">
+                            {Math.round(zoom * 100)}%
+                          </span>
+                          <Button
+                            type="button"
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setZoom((prev) => Math.min(2.5, Number((prev + 0.1).toFixed(1))))}
+                          >
+                            <ZoomIn className="h-4 w-4" />
+                          </Button>
+                          <Button type="button" variant="outline" onClick={() => setZoom(1)}>
+                            {t('documents.details.zoomReset')}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-1 min-h-0 overflow-auto">
+                      <div className="rounded-md border bg-muted/20 p-3">
+                        {isPdfLoading && (
+                          <p className="text-sm text-muted-foreground">{t('documents.details.previewLoading')}</p>
+                        )}
+                        {!isPdfLoading && (pdfLoadFailed || !pdfObjectUrl) && (
+                          <p className="text-sm text-destructive">
+                            {pdfErrorMessage
+                              ? `${t('documents.details.previewError')} (${pdfErrorMessage})`
+                              : t('documents.details.previewError')}
+                          </p>
+                        )}
+                        {!isPdfLoading && !pdfLoadFailed && pdfObjectUrl && (
+                          <div className="overflow-auto">
+                            <iframe
+                              title={t('documents.details.previewTitle')}
+                              src={pdfObjectUrl}
+                              className="border-0"
+                              style={{
+                                width: `${100 / zoom}%`,
+                                minHeight: `${Math.round(70 / zoom)}vh`,
+                                transform: `scale(${zoom})`,
+                                transformOrigin: 'top left',
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <fieldset disabled={isReportCreated} className="contents">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">{t('documents.details.formHint')}</p>
                     <Button
                       type="button"
                       variant="outline"
@@ -894,8 +1056,7 @@ export default function DocumentDetails() {
                       {t('documents.details.addRow')}
                     </Button>
                   </div>
-
-                  <div className="rounded-md border overflow-x-auto">
+                  <div className="rounded-md border overflow-x-auto mt-4">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -1084,90 +1245,25 @@ export default function DocumentDetails() {
                     </Table>
                   </div>
 
-                  <p className="text-sm text-muted-foreground">
-                    {t('documents.details.numericOnlyNotice')}
-                  </p>
                   {rowsError && <p className="text-sm text-destructive">{rowsError}</p>}
-
-                  <div className="flex justify-end">
-                    <Button type="submit" disabled={isSavingReport}>
-                      {isSavingReport ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('documents.details.saving')}
-                        </>
-                      ) : (
-                        t('documents.details.save')
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between gap-3">
-                  <CardTitle>{t('documents.details.previewTitle')}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setZoom((prev) => Math.max(0.5, Number((prev - 0.1).toFixed(1))))}
-                    >
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                    <span className="min-w-[56px] text-center text-sm text-muted-foreground">
-                      {Math.round(zoom * 100)}%
-                    </span>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setZoom((prev) => Math.min(2.5, Number((prev + 0.1).toFixed(1))))}
-                    >
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setZoom(1)}>
-                      {t('documents.details.zoomReset')}
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-[70vh] overflow-auto rounded-md border bg-muted/20 p-3">
-                  {isPdfLoading && (
-                    <p className="text-sm text-muted-foreground">{t('documents.details.previewLoading')}</p>
-                  )}
-
-                  {!isPdfLoading && (pdfLoadFailed || !pdfObjectUrl) && (
-                    <p className="text-sm text-destructive">
-                      {pdfErrorMessage
-                        ? `${t('documents.details.previewError')} (${pdfErrorMessage})`
-                        : t('documents.details.previewError')}
-                    </p>
-                  )}
-
-                  {!isPdfLoading && !pdfLoadFailed && pdfObjectUrl && (
-                    <div className="overflow-auto">
-                      <iframe
-                        title={t('documents.details.previewTitle')}
-                        src={pdfObjectUrl}
-                        className="border-0"
-                        style={{
-                          width: `${100 / zoom}%`,
-                          minHeight: `${Math.round(70 / zoom)}vh`,
-                          transform: `scale(${zoom})`,
-                          transformOrigin: 'top left',
-                        }}
-                      />
+                  {!isReportCreated && (
+                    <div className="flex justify-end">
+                      <Button type="submit" disabled={isSavingReport}>
+                        {isSavingReport ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t('documents.details.saving')}
+                          </>
+                        ) : (
+                          t('documents.details.save')
+                        )}
+                      </Button>
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                  </CardContent>
+                </Card>
+              </fieldset>
+          </form>
         )}
 
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
