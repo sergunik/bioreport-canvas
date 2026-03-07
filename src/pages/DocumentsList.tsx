@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { FileText } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import {
 import { documentService } from '@/api';
 import type { DocumentJobStatus } from '@/types/api';
 import { cn } from '@/lib/utils';
+import DocumentUploadCard from '@/components/DocumentUploadCard';
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -93,14 +94,22 @@ export default function DocumentsList() {
   return (
     <MainLayout>
       <PageContainer size="xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            {t('documents.list.title')}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {t('documents.list.subtitle')}
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              {t('documents.list.title')}
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {t('documents.list.subtitle')}
+            </p>
+          </div>
+          <Button className="gap-2" onClick={() => navigate('/documents/upload')}>
+            <Plus className="h-4 w-4" />
+            {t('documents.list.uploadFirst')}
+          </Button>
         </div>
+
+        {isEmpty && <DocumentUploadCard />}
 
         {isLoading && (
           <Card>
@@ -179,28 +188,6 @@ export default function DocumentsList() {
           </Card>
         )}
 
-        {isEmpty && (
-          <Card className="border-dashed border-2">
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <FileText className="h-8 w-8 text-primary" />
-              </div>
-              <h2 className="mt-6 text-xl font-semibold text-foreground">
-                {t('documents.list.emptyTitle')}
-              </h2>
-              <p className="mt-2 max-w-sm text-muted-foreground">
-                {t('documents.list.emptyDescription')}
-              </p>
-              <Button
-                className="mt-6 gap-2"
-                onClick={() => navigate('/documents/upload')}
-              >
-                <FileText className="h-4 w-4" />
-                {t('documents.list.uploadFirst')}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
       </PageContainer>
     </MainLayout>
   );

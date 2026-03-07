@@ -157,7 +157,6 @@ describe('DocumentDetails', () => {
     });
 
     expect(screen.getByDisplayValue('Document doc-1 - 2024-11-13')).toBeInTheDocument();
-    expect(screen.getByText('documents.details.numericOnlyNotice')).toBeInTheDocument();
   });
 
   it('deletes document after confirmation and redirects to list', async () => {

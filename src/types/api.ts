@@ -123,6 +123,7 @@ export interface DiagnosticReportResource {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  document_uuids?: string[];
   observations: ObservationResource[];
 }
 
@@ -150,6 +151,23 @@ export interface StoreObservationRequest {
 
 export interface StoreObservationBatchRequest {
   observations: StoreObservationRequest[];
+}
+
+export interface StoreDocumentExtractionRequest {
+  document_uuid: string;
+  title?: string | null;
+  notes?: string | null;
+  observations: StoreObservationRequest[];
+}
+
+export interface DocumentExtractionResponse {
+  id: number;
+  title: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  observations: ObservationResource[];
+  document_ids: number[];
 }
 
 // ==================== Document Types ====================
@@ -203,6 +221,7 @@ export interface DocumentFinalResultPerson {
 export interface DocumentFinalResult {
   person: DocumentFinalResultPerson;
   diagnostic_date: string | null;
+  diagnostic_title?: string | null;
   language: string | null;
   markers: DocumentFinalResultMarker[];
   pii: string[];
@@ -218,12 +237,13 @@ export interface DocumentMetadataResource {
   status: DocumentJobStatus;
   error_message: string | null;
   job_status: DocumentJobStatus;
+  diagnostic_title?: string | null;
   parsed_result: unknown | null;
   anonymised_result: unknown | null;
   anonymised_artifacts: unknown[] | null;
   normalized_result: unknown[] | null;
   transliteration_mapping: unknown[] | null;
-  final_result: unknown | null;
+  final_result: DocumentFinalResult | null;
 }
 
 // ==================== Error Types ====================

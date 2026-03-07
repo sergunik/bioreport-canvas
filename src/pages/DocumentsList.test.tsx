@@ -89,18 +89,6 @@ describe('DocumentsList', () => {
     expect(screen.getByText('documents.list.statusValue.unknown')).toBeInTheDocument();
   });
 
-  it('navigates to upload page from empty state action', async () => {
-    mockList.mockResolvedValue({ data: [] });
-    renderPage();
-
-    await waitFor(() => {
-      expect(screen.getByText('documents.list.emptyTitle')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('documents.list.uploadFirst'));
-    expect(mockNavigate).toHaveBeenCalledWith('/documents/upload');
-  });
-
   it('navigates to details for done and failed rows only', async () => {
     mockList.mockResolvedValue({
       data: [

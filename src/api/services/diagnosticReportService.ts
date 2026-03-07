@@ -3,6 +3,8 @@ import type {
   DiagnosticReportResource,
   DiagnosticReportListResponse,
   StoreDiagnosticReportRequest,
+  StoreDocumentExtractionRequest,
+  DocumentExtractionResponse,
 } from '@/types/api';
 
 export const diagnosticReportService = {
@@ -18,6 +20,12 @@ export const diagnosticReportService = {
     data: StoreDiagnosticReportRequest
   ): Promise<DiagnosticReportResource> => {
     return api.post<DiagnosticReportResource>('/diagnostic-reports', data);
+  },
+
+  createFromDocumentExtraction: async (
+    data: StoreDocumentExtractionRequest
+  ): Promise<DocumentExtractionResponse> => {
+    return api.post<DocumentExtractionResponse>('/document-extraction', data);
   },
 };
 
