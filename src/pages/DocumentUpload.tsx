@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import DocumentUploadCard from '@/components/DocumentUploadCard';
 
 export default function DocumentUpload() {
@@ -11,6 +12,9 @@ export default function DocumentUpload() {
   return (
     <MainLayout>
       <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
             {t('documents.upload.title')}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { User, Shield, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { cn } from '@/lib/utils';
 
 const settingsNav = [
@@ -38,6 +39,9 @@ export default function Settings() {
   return (
     <MainLayout>
       <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
             {t('settings.title')}

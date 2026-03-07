@@ -41,7 +41,7 @@ function renderSettings(initialPath = '/settings') {
 describe('Settings', () => {
   it('renders the settings page title', () => {
     renderSettings();
-    expect(screen.getByText('Settings')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Settings' })).toBeInTheDocument();
   });
 
   it('renders all navigation links', () => {
@@ -74,7 +74,10 @@ describe('Settings', () => {
 
   it('applies active styling to profile link when on profile page', () => {
     renderSettings('/settings/profile');
-    const profileLink = screen.getByText('Profile').closest('a');
+    const profileLink = screen
+      .getAllByRole('link', { name: 'Profile' })
+      .find((link) => link.getAttribute('href') === '/settings/profile' && link.className.includes('rounded-lg'));
+    expect(profileLink).toBeDefined();
     expect(profileLink).toHaveClass('bg-secondary', 'text-foreground');
   });
 
@@ -93,7 +96,10 @@ describe('Settings', () => {
 
   it('applies active danger styling when on danger zone page', () => {
     renderSettings('/settings/danger');
-    const dangerLink = screen.getByRole('link', { name: 'Danger Zone' });
+    const dangerLink = screen
+      .getAllByRole('link', { name: 'Danger Zone' })
+      .find((link) => link.getAttribute('href') === '/settings/danger' && link.className.includes('rounded-lg'));
+    expect(dangerLink).toBeDefined();
     expect(dangerLink).toHaveClass('bg-destructive/10', 'text-destructive');
   });
 

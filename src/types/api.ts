@@ -131,6 +131,10 @@ export interface DiagnosticReportListResponse {
   data: DiagnosticReportResource[];
 }
 
+export interface ObservationListResponse {
+  data: ObservationResource[];
+}
+
 export interface StoreDiagnosticReportRequest {
   title?: string | null;
   notes?: string | null;

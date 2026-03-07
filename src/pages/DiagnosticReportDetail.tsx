@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -64,7 +64,10 @@ export default function DiagnosticReportDetail() {
   if (isLoading) {
     return (
       <MainLayout>
-        <PageContainer size="lg">
+        <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <p className="text-muted-foreground">Loading report...</p>
         </PageContainer>
       </MainLayout>
@@ -74,15 +77,10 @@ export default function DiagnosticReportDetail() {
   if (isError || !report) {
     return (
       <MainLayout>
-        <PageContainer size="lg">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-2 text-muted-foreground"
-            onClick={() => navigate('/diagnostic-reports')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reports
-          </Button>
+        <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-destructive">
@@ -106,16 +104,11 @@ export default function DiagnosticReportDetail() {
 
   return (
     <MainLayout>
-      <PageContainer size="lg">
+      <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-2 text-muted-foreground"
-            onClick={() => navigate('/diagnostic-reports')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reports
-          </Button>
           <h1 className="text-3xl font-bold text-foreground">{displayTitle}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Created {formatDate(report.created_at)}

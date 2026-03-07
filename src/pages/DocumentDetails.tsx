@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Loader2, Plus, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
+import { Loader2, Plus, Trash2, ZoomIn, ZoomOut } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -750,6 +751,9 @@ export default function DocumentDetails() {
     return (
       <MainLayout>
         <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <Card className="border-destructive/50">
             <CardContent className="py-8 text-center text-destructive">
               {t('documents.details.missingId')}
@@ -764,6 +768,9 @@ export default function DocumentDetails() {
     return (
       <MainLayout>
         <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <Card>
             <CardContent className="flex items-center justify-center py-16 text-muted-foreground">
               {t('common.loading')}
@@ -778,6 +785,9 @@ export default function DocumentDetails() {
     return (
       <MainLayout>
         <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <Card className="border-destructive/50">
             <CardContent className="py-8 text-center text-destructive">
               {metadataQuery.error instanceof Error
@@ -793,16 +803,11 @@ export default function DocumentDetails() {
   return (
     <MainLayout>
       <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <Button
-              variant="ghost"
-              className="mb-2 gap-2 text-muted-foreground"
-              onClick={() => navigate('/documents')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {t('documents.details.backToList')}
-            </Button>
             <h1 className="text-3xl font-bold text-foreground">{t('documents.details.title')}</h1>
           </div>
           <Button

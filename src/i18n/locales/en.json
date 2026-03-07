@@ -16,6 +16,7 @@
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "biomarkers": "Biomarkers",
     "settings": "Settings",
     "profile": "Profile",
     "security": "Security",
@@ -202,7 +203,9 @@
       "totalReports": "Total Reports",
       "totalUploadedDocuments": "Total uploaded documents",
       "familyMembers": "Family Members",
-      "lastActivity": "Last Activity"
+      "lastActivity": "Last Activity",
+      "observations": "Observations charts",
+      "view": "View"
     }
   },
   "documents": {
@@ -362,5 +365,14 @@
         "confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers."
       }
     }
+  },
+  "biomarkers": {
+    "title": "Biomarkers",
+    "latestValue": "Latest value",
+    "lastUpdated": "Last updated",
+    "code": "Code",
+    "loading": "Loading biomarkers...",
+    "errorLoad": "Failed to load biomarkers",
+    "empty": "No biomarkers yet"
   }
 }

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { FlaskConical, Plus, FileText, ChevronRight } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { diagnosticReportService } from '@/api';
@@ -32,6 +33,9 @@ export default function DiagnosticReportsList() {
   return (
     <MainLayout>
       <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Diagnostic Reports</h1>

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Menu, X, User, Settings, LogOut, FileText } from 'lucide-react';
 import { useState } from 'react';
@@ -11,12 +11,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
 
 export function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
   const { isAuthenticated, user, logout, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -25,45 +23,16 @@ export function Header() {
     navigate('/');
   };
 
-  const navItems = isAuthenticated
-    ? [
-        { label: t('nav.dashboard'), href: '/dashboard' },
-        { label: t('nav.settings'), href: '/settings' },
-      ]
-    : [];
-
-  const isActiveRoute = (href: string) => location.pathname === href;
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
+        <Link to={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
             <FileText className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-xl font-semibold text-foreground">BioReport</span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 md:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                isActiveRoute(item.href)
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Right side - Auth buttons or User menu */}
         <div className="flex items-center gap-4">
           {isLoading ? (
             <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
@@ -83,6 +52,10 @@ export function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t('nav.dashboard')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
                   <Settings className="mr-2 h-4 w-4" />
                   {t('nav.settings')}
@@ -128,21 +101,31 @@ export function Header() {
       {mobileMenuOpen && (
         <div className="border-t border-border bg-background md:hidden">
           <nav className="container mx-auto flex flex-col gap-2 px-4 py-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                to={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  isActiveRoute(item.href)
-                    ? 'bg-accent text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  {t('nav.dashboard')}
+                </Link>
+                <Link
+                  to="/biomarkers"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  {t('nav.biomarkers')}
+                </Link>
+                <Link
+                  to="/settings/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  {t('nav.settings')}
+                </Link>
+              </>
+            ) : null}
             {!isAuthenticated && (
               <>
                 <Link
