@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { FileText, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,7 @@ import {
 import { documentService } from '@/api';
 import type { DocumentJobStatus } from '@/types/api';
 import { cn } from '@/lib/utils';
-import DocumentUpload from './DocumentUpload';
+import DocumentUploadCard from '@/components/DocumentUploadCard';
 
 function formatDate(iso: string) {
   const date = new Date(iso);
@@ -91,10 +91,6 @@ export default function DocumentsList() {
   const documents = data?.data ?? [];
   const isEmpty = !isLoading && !isError && documents.length === 0;
 
-  if (isEmpty) {
-    return <DocumentUpload />;
-  }
-
   return (
     <MainLayout>
       <PageContainer size="xl">
@@ -112,6 +108,8 @@ export default function DocumentsList() {
             {t('documents.list.uploadFirst')}
           </Button>
         </div>
+
+        {isEmpty && <DocumentUploadCard />}
 
         {isLoading && (
           <Card>

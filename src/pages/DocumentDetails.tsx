@@ -45,7 +45,7 @@ import type {
   DocumentJobStatus,
   DocumentMetadataResource,
   ObservationValueType,
-  StoreDocumentExtractionObservationRequest,
+  StoreObservationRequest,
 } from '@/types/api';
 
 interface ObservationRow {
@@ -447,7 +447,7 @@ export default function DocumentDetails() {
       });
       return;
     }
-    const payloads: Array<{ rowId: string; payload: StoreDocumentExtractionObservationRequest }> = [];
+    const payloads: Array<{ rowId: string; payload: StoreObservationRequest }> = [];
     const nextInvalidUnitRowIds: string[] = [];
     const nextInvalidReferenceRowIds: string[] = [];
 

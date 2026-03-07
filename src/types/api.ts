@@ -243,7 +243,7 @@ export interface DocumentMetadataResource {
   anonymised_artifacts: unknown[] | null;
   normalized_result: unknown[] | null;
   transliteration_mapping: unknown[] | null;
-  final_result: unknown | null;
+  final_result: DocumentFinalResult | null;
 }
 
 // ==================== Error Types ====================
