@@ -160,6 +160,11 @@
       "timezoneRequired": "Please select a timezone"
     }
   },
+  "diagnosticReports": {
+    "detail": {
+      "attachedDocuments": "Attached Documents"
+    }
+  },
   "dashboard": {
     "welcome": "Welcome back",
     "emptyState": {

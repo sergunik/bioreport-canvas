@@ -153,22 +153,11 @@ export interface StoreObservationBatchRequest {
   observations: StoreObservationRequest[];
 }
 
-export interface StoreDocumentExtractionObservationRequest {
-  biomarker_name: string;
-  biomarker_code?: string | null;
-  value_type?: ObservationValueType;
-  value: number | boolean | string;
-  unit?: string | null;
-  reference_range_min?: number | null;
-  reference_range_max?: number | null;
-  reference_unit?: string | null;
-}
-
 export interface StoreDocumentExtractionRequest {
   document_uuid: string;
   title?: string | null;
   notes?: string | null;
-  observations: StoreDocumentExtractionObservationRequest[];
+  observations: StoreObservationRequest[];
 }
 
 export interface DocumentExtractionResponse {

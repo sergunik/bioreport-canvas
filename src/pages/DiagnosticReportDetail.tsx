@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 
@@ -38,6 +39,7 @@ function formatObservationValue(value: number | boolean | string): string {
 }
 
 export default function DiagnosticReportDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const reportId = id != null ? Number(id) : NaN;
@@ -134,12 +136,19 @@ export default function DiagnosticReportDetail() {
         {report.document_uuids && report.document_uuids.length > 0 && (
           <Card className="mb-8">
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Attached Documents</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-4">
+                {t('diagnosticReports.detail.attachedDocuments')}
+              </h2>
               <ul className="space-y-2">
                 {report.document_uuids.map((uuid) => (
                   <li key={uuid} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-primary/40" />
-                    {uuid}.pdf
+                    <Link
+                      to={`/documents/${uuid}`}
+                      className="flex items-center gap-2 text-muted-foreground hover:text-foreground hover:underline"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-primary/40" />
+                      {uuid}.pdf
+                    </Link>
                   </li>
                 ))}
               </ul>

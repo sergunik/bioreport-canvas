@@ -109,7 +109,7 @@ export default function DocumentsList() {
           </div>
           <Button className="gap-2" onClick={() => navigate('/documents/upload')}>
             <Plus className="h-4 w-4" />
-            Upload document
+            {t('documents.list.uploadFirst')}
           </Button>
         </div>
 
