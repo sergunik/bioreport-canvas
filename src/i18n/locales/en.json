@@ -1,4 +1,19 @@
 {
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "diagnostic-reports": "Reports",
+    "documents": "Documents",
+    "settings": "Settings",
+    "biomarkers": "Biomarkers",
+    "new": "New",
+    "upload": "Upload",
+    "profile": "Profile",
+    "security": "Security",
+    "sensitive-words": "Sensitive Words",
+    "danger": "Danger Zone",
+    "report": "Report {{id}}",
+    "document": "Document"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
@@ -16,6 +31,7 @@
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "biomarkers": "Biomarkers",
     "settings": "Settings",
     "profile": "Profile",
     "security": "Security",
@@ -160,6 +176,20 @@
       "timezoneRequired": "Please select a timezone"
     }
   },
+  "diagnosticReport": {
+    "loading": "Loading report...",
+    "notFound": "Report not found",
+    "backToList": "Back to list",
+    "notes": "Notes",
+    "observations": "Observations",
+    "noObservations": "No observations in this report.",
+    "headers": {
+      "biomarker": "Biomarker",
+      "value": "Value",
+      "unit": "Unit",
+      "referenceRange": "Reference range"
+    }
+  },
   "diagnosticReports": {
     "detail": {
       "attachedDocuments": "Attached Documents"
@@ -202,7 +232,9 @@
       "totalReports": "Total Reports",
       "totalUploadedDocuments": "Total uploaded documents",
       "familyMembers": "Family Members",
-      "lastActivity": "Last Activity"
+      "lastActivity": "Last Activity",
+      "observations": "Observations charts",
+      "view": "View"
     }
   },
   "documents": {
@@ -338,7 +370,7 @@
     },
     "sensitiveWords": {
       "title": "Sensitive Words",
-      "description": "Specify personal identifiers that must always be anonymized.\n\nInclude sensitive details such as first name, last name, middle name, street name, city, year of birth, and other identifying information.\n\nYou may enter terms in Latin (ICU) or non-Latin characters — the system will automatically transliterate and normalize them. Separate words with spaces. Commas or periods are allowed and will be automatically cleaned.",
+      "description": "Specify personal identifiers that must always be anonymized.\n\nInclude sensitive details such as first name, last name, middle name, street name, city, year of birth, and other identifying information.\n\nYou may enter terms in any script (e.g. Cyrillic or Latin). The system stores them as entered and only normalizes extra spaces and lowercases. Separate words with spaces. Commas or periods are allowed and will be automatically cleaned.",
       "fieldLabel": "Words and identifiers",
       "placeholder": "ivan shevchenko kyiv 1990 khreshchatyk",
       "saved": "Sensitive words updated successfully",
@@ -362,5 +394,18 @@
         "confirmDescription": "This action cannot be undone. This will permanently delete your account and remove all your data from our servers."
       }
     }
+  },
+  "biomarkers": {
+    "title": "Biomarkers",
+    "value": "Value",
+    "date": "Date",
+    "latestValue": "Latest value",
+    "lastUpdated": "Last updated",
+    "code": "Code",
+    "loading": "Loading biomarkers...",
+    "errorLoad": "Failed to load biomarkers",
+    "empty": "No biomarkers yet",
+    "chartLegendNegative": "Negative (false)",
+    "chartLegendPositive": "Positive (true)"
   }
 }

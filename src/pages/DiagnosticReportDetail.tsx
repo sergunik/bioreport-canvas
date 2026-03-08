@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -16,20 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { diagnosticReportService } from '@/api';
-
-function formatDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
-}
+import { formatDate } from '@/lib/date';
 
 function formatObservationValue(value: number | boolean | string): string {
   if (typeof value === 'boolean') {
@@ -64,8 +51,11 @@ export default function DiagnosticReportDetail() {
   if (isLoading) {
     return (
       <MainLayout>
-        <PageContainer size="lg">
-          <p className="text-muted-foreground">Loading report...</p>
+        <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
+          <p className="text-muted-foreground">{t('diagnosticReport.loading')}</p>
         </PageContainer>
       </MainLayout>
     );
@@ -74,26 +64,21 @@ export default function DiagnosticReportDetail() {
   if (isError || !report) {
     return (
       <MainLayout>
-        <PageContainer size="lg">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-2 text-muted-foreground"
-            onClick={() => navigate('/diagnostic-reports')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reports
-          </Button>
+        <PageContainer size="xl">
+          <div className="mb-4">
+            <PageBreadcrumbs />
+          </div>
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-destructive">
-                {error instanceof Error ? error.message : 'Report not found'}
+                {error instanceof Error ? error.message : t('diagnosticReport.notFound')}
               </p>
               <Button
                 variant="outline"
                 className="mt-4"
                 onClick={() => navigate('/diagnostic-reports')}
               >
-                Back to list
+                {t('diagnosticReport.backToList')}
               </Button>
             </CardContent>
           </Card>
@@ -106,28 +91,23 @@ export default function DiagnosticReportDetail() {
 
   return (
     <MainLayout>
-      <PageContainer size="lg">
+      <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-2 text-muted-foreground"
-            onClick={() => navigate('/diagnostic-reports')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reports
-          </Button>
           <h1 className="text-3xl font-bold text-foreground">{displayTitle}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Created {formatDate(report.created_at)}
+            Created {formatDate(report.created_at, { pattern: 'datetime' })}
             {report.updated_at !== report.created_at &&
-              ` · Updated ${formatDate(report.updated_at)}`}
+              ` · Updated ${formatDate(report.updated_at, { pattern: 'datetime' })}`}
           </p>
         </div>
 
         {report.notes && (
           <Card className="mb-8">
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold text-foreground mb-2">Notes</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">{t('diagnosticReport.notes')}</h2>
               <p className="text-muted-foreground whitespace-pre-wrap">{report.notes}</p>
             </CardContent>
           </Card>
@@ -159,19 +139,19 @@ export default function DiagnosticReportDetail() {
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">
-              Observations
+              {t('diagnosticReport.observations')}
             </h2>
             {report.observations.length === 0 ? (
-              <p className="text-muted-foreground">No observations in this report.</p>
+              <p className="text-muted-foreground">{t('diagnosticReport.noObservations')}</p>
             ) : (
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Biomarker</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead>Unit</TableHead>
-                      <TableHead>Reference range</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.biomarker')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.value')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.unit')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.referenceRange')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 
 import { MainLayout, PageContainer } from '@/components/layout';
+import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -439,17 +440,11 @@ export default function NewDiagnosticReport() {
 
   return (
     <MainLayout>
-      <PageContainer size="lg">
+      <PageContainer size="xl">
+        <div className="mb-4">
+          <PageBreadcrumbs />
+        </div>
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            className="mb-4 gap-2 text-muted-foreground"
-            onClick={() => navigate('/diagnostic-reports')}
-            disabled={isSubmitting}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Reports
-          </Button>
           <h1 className="text-3xl font-bold text-foreground">New Diagnostic Report</h1>
           <p className="mt-2 text-muted-foreground">
             Enter the details of your diagnostic report and observations.

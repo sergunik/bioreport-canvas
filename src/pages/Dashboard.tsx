@@ -8,7 +8,7 @@ import {
   Activity,
   FileText,
   FileUp,
-  Clock,
+  LineChart,
   ArrowRight,
   Sparkles,
 } from 'lucide-react';
@@ -217,18 +217,6 @@ export default function Dashboard() {
                     onClick={() => navigate('/settings/profile')}
                   />
                 )}
-                <QuickActionCard
-                  title={t('dashboard.quickActions.addFamily.title')}
-                  description={t('dashboard.quickActions.addFamily.description')}
-                  icon={<Users className="h-5 w-5" />}
-                  comingSoon
-                />
-                <QuickActionCard
-                  title={t('dashboard.quickActions.exploreTimeline.title')}
-                  description={t('dashboard.quickActions.exploreTimeline.description')}
-                  icon={<Activity className="h-5 w-5" />}
-                  comingSoon
-                />
               </div>
             </div>
           </div>
@@ -236,6 +224,12 @@ export default function Dashboard() {
           {/* Sidebar Stats */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Summary</h2>
+            <StatCard
+              label={t('dashboard.stats.observations')}
+              value={t('dashboard.stats.view')}
+              icon={<LineChart className="h-5 w-5" />}
+              onClick={() => navigate('/biomarkers')}
+            />
             <StatCard
               label={t('dashboard.stats.totalUploadedDocuments')}
               value={documentCount}
@@ -246,11 +240,6 @@ export default function Dashboard() {
               label={t('dashboard.stats.familyMembers')}
               value={1}
               icon={<Users className="h-5 w-5" />}
-            />
-            <StatCard
-              label={t('dashboard.stats.lastActivity')}
-              value="Today"
-              icon={<Clock className="h-5 w-5" />}
             />
           </div>
         </div>
