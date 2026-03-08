@@ -55,7 +55,7 @@ export default function DiagnosticReportDetail() {
           <div className="mb-4">
             <PageBreadcrumbs />
           </div>
-          <p className="text-muted-foreground">Loading report...</p>
+          <p className="text-muted-foreground">{t('diagnosticReport.loading')}</p>
         </PageContainer>
       </MainLayout>
     );
@@ -71,14 +71,14 @@ export default function DiagnosticReportDetail() {
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-destructive">
-                {error instanceof Error ? error.message : 'Report not found'}
+                {error instanceof Error ? error.message : t('diagnosticReport.notFound')}
               </p>
               <Button
                 variant="outline"
                 className="mt-4"
                 onClick={() => navigate('/diagnostic-reports')}
               >
-                Back to list
+                {t('diagnosticReport.backToList')}
               </Button>
             </CardContent>
           </Card>
@@ -107,7 +107,7 @@ export default function DiagnosticReportDetail() {
         {report.notes && (
           <Card className="mb-8">
             <CardContent className="pt-6">
-              <h2 className="text-lg font-semibold text-foreground mb-2">Notes</h2>
+              <h2 className="text-lg font-semibold text-foreground mb-2">{t('diagnosticReport.notes')}</h2>
               <p className="text-muted-foreground whitespace-pre-wrap">{report.notes}</p>
             </CardContent>
           </Card>
@@ -139,19 +139,19 @@ export default function DiagnosticReportDetail() {
         <Card>
           <CardContent className="pt-6">
             <h2 className="text-lg font-semibold text-foreground mb-4">
-              Observations
+              {t('diagnosticReport.observations')}
             </h2>
             {report.observations.length === 0 ? (
-              <p className="text-muted-foreground">No observations in this report.</p>
+              <p className="text-muted-foreground">{t('diagnosticReport.noObservations')}</p>
             ) : (
               <div className="rounded-md border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Biomarker</TableHead>
-                      <TableHead>Value</TableHead>
-                      <TableHead>Unit</TableHead>
-                      <TableHead>Reference range</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.biomarker')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.value')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.unit')}</TableHead>
+                      <TableHead>{t('diagnosticReport.headers.referenceRange')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

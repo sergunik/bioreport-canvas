@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { sanitizeSensitiveWordsInput } from '@/lib/sensitiveWords';
 
 describe('sanitizeSensitiveWordsInput', () => {
-  it('normalizes separators and keeps only letters, digits, apostrophe to match backend regex', () => {
+  it('normalizes separators and keeps letters (including Cyrillic), digits, apostrophe', () => {
     const input = 'ivan,\n shevchenko; kyiv...1990';
     expect(sanitizeSensitiveWordsInput(input)).toBe('ivan shevchenko kyiv 1990');
   });
 
-  it('preserves apostrophes inside words (backend allows a-zA-Z0-9\')', () => {
+  it('preserves apostrophes inside words', () => {
     const input = "O'Connor, D'Artagnan";
     expect(sanitizeSensitiveWordsInput(input)).toBe("o'connor d'artagnan");
   });
@@ -18,9 +18,9 @@ describe('sanitizeSensitiveWordsInput', () => {
     expect(sanitizeSensitiveWordsInput(input)).toBe('ivan shevchenko');
   });
 
-  it('transliterates and strips diacritics', () => {
-    const input = 'José Łódź';
-    expect(sanitizeSensitiveWordsInput(input)).toBe('jose lodz');
+  it('keeps Cyrillic and only lowercases and normalizes separators', () => {
+    const input = 'Топольський Андрій Антонович';
+    expect(sanitizeSensitiveWordsInput(input)).toBe('топольський андрій антонович');
   });
 
   it('removes duplicate words and keeps unique ones', () => {

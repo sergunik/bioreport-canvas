@@ -4,13 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { MainLayout, PageContainer } from '@/components/layout';
 import { PageBreadcrumbs } from '@/components/layout/PageBreadcrumbs';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious,
-  PaginationNext,
-} from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { observationService } from '@/api';
 import { groupObservationsByBiomarkerCode } from '@/lib/observations';
 import { BiomarkerCard } from '@/components/biomarkers/BiomarkerCard';
@@ -80,15 +76,18 @@ export default function Biomarkers() {
               <Pagination className="mt-8">
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage((p) => Math.max(1, p - 1));
-                      }}
-                      className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
-                      aria-disabled={currentPage <= 1}
-                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="default"
+                      aria-label="Go to previous page"
+                      disabled={currentPage <= 1}
+                      className="gap-1 pl-2.5"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>Previous</span>
+                    </Button>
                   </PaginationItem>
                   <PaginationItem>
                     <span className="px-4 py-2 text-sm text-muted-foreground">
@@ -96,15 +95,18 @@ export default function Biomarkers() {
                     </span>
                   </PaginationItem>
                   <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setPage((p) => Math.min(totalPages, p + 1));
-                      }}
-                      className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : ''}
-                      aria-disabled={currentPage >= totalPages}
-                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="default"
+                      aria-label="Go to next page"
+                      disabled={currentPage >= totalPages}
+                      className="gap-1 pr-2.5"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    >
+                      <span>Next</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
