@@ -40,6 +40,7 @@ import {
 import { diagnosticReportService, documentService, ApiClientError } from '@/api';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date';
 import type {
   DocumentFinalResult,
   DocumentFinalResultMarker,
@@ -65,23 +66,6 @@ const markerTypeOptions: ObservationValueType[] = ['numeric', 'boolean', 'text']
 
 function generateId() {
   return Math.random().toString(36).substring(2, 9);
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) {
-    return '-';
-  }
-
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
 }
 
 function formatSize(bytes: number): string {
@@ -1046,7 +1030,7 @@ export default function DocumentDetails() {
               </div>
 
               <fieldset disabled={isReportCreated} className="contents">
-                <Card>
+                <Card className="mt-6">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">{t('documents.details.formHint')}</p>
@@ -1061,7 +1045,7 @@ export default function DocumentDetails() {
                       {t('documents.details.addRow')}
                     </Button>
                   </div>
-                  <div className="rounded-md border overflow-x-auto mt-4">
+                  <div className="rounded-md border mt-4 min-w-0">
                     <Table>
                       <TableHeader>
                         <TableRow>

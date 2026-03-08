@@ -1,19 +1,13 @@
 import { useTranslation } from 'react-i18next';
-import { format } from 'date-fns';
 import type { ObservationResource } from '@/types/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { NumericChart } from '@/components/biomarkers/NumericChart';
 import { BooleanChart } from '@/components/biomarkers/BooleanChart';
 import { TextTimeline } from '@/components/biomarkers/TextTimeline';
+import { formatDate } from '@/lib/date';
 
 interface BiomarkerCardProps {
   observations: ObservationResource[];
-}
-
-function formatDate(iso: string) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return format(date, 'MMM d, yyyy');
 }
 
 export function BiomarkerCard({ observations }: BiomarkerCardProps) {

@@ -1,4 +1,19 @@
 {
+  "breadcrumbs": {
+    "dashboard": "Dashboard",
+    "diagnostic-reports": "Reports",
+    "documents": "Documents",
+    "settings": "Settings",
+    "biomarkers": "Biomarkers",
+    "new": "New",
+    "upload": "Upload",
+    "profile": "Profile",
+    "security": "Security",
+    "sensitive-words": "Sensitive Words",
+    "danger": "Danger Zone",
+    "report": "Report {{id}}",
+    "document": "Document"
+  },
   "common": {
     "loading": "Loading...",
     "save": "Save",
@@ -368,11 +383,15 @@
   },
   "biomarkers": {
     "title": "Biomarkers",
+    "value": "Value",
+    "date": "Date",
     "latestValue": "Latest value",
     "lastUpdated": "Last updated",
     "code": "Code",
     "loading": "Loading biomarkers...",
     "errorLoad": "Failed to load biomarkers",
-    "empty": "No biomarkers yet"
+    "empty": "No biomarkers yet",
+    "chartLegendNegative": "Negative (false)",
+    "chartLegendPositive": "Positive (true)"
   }
 }

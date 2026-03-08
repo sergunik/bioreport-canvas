@@ -1,26 +1,38 @@
-import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import type { ObservationResource } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { parseDate, formatDate } from '@/lib/date';
 
 interface BooleanChartProps {
   observations: ObservationResource[];
 }
 
-function toStatePoint(obs: ObservationResource, index: number) {
+function toStatePoint(
+  obs: ObservationResource,
+  index: number,
+  translatedLabelPositive: string,
+  translatedLabelNegative: string
+) {
   const v = obs.value;
   const bool = v === true || v === 'true' || String(v).toLowerCase() === 'true';
-  const ts = new Date(obs.created_at).getTime();
+  const date = parseDate(obs.created_at);
+  const ts = date ? date.getTime() : 0;
   return {
     index,
-    label: bool ? 'Positive' : 'Negative',
+    label: bool ? translatedLabelPositive : translatedLabelNegative,
     state: bool ? 'positive' : 'negative',
     created_at: obs.created_at,
-    timestamp: Number.isNaN(ts) ? 0 : ts,
+    timestamp: ts,
   };
 }
 
 export function BooleanChart({ observations }: BooleanChartProps) {
-  const data = observations.map((o, i) => toStatePoint(o, i));
+  const { t } = useTranslation();
+  const labelPositive = t('documents.details.booleanValueOptions.positive');
+  const labelNegative = t('documents.details.booleanValueOptions.negative');
+  const data = observations.map((o, i) =>
+    toStatePoint(o, i, labelPositive, labelNegative)
+  );
   const timestamps = data.map((d) => d.timestamp);
   const minTs = Math.min(...timestamps);
   const maxTs = Math.max(...timestamps);
@@ -60,11 +72,11 @@ export function BooleanChart({ observations }: BooleanChartProps) {
                 : 'bg-[hsl(var(--destructive))]'
             )}
             style={{ left: `${positionByTime(point.timestamp)}%` }}
-            title={`${point.label} • ${format(new Date(point.created_at), 'MMM d, yyyy')}`}
-            aria-label={`${point.label} at ${format(new Date(point.created_at), 'MMM d, yyyy')}`}
+            title={`${point.label} • ${formatDate(point.created_at, { fallback: '' })}`}
+            aria-label={`${point.label} at ${formatDate(point.created_at, { fallback: '' })}`}
           >
             <span className="pointer-events-none absolute left-1/2 top-[-0.65rem] z-10 hidden -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-border bg-popover px-2 py-1 text-[11px] text-popover-foreground shadow-sm group-hover:block">
-              {format(new Date(point.created_at), 'MMM d, yyyy')}
+              {formatDate(point.created_at, { fallback: '' })}
             </span>
           </div>
         ))}
@@ -89,11 +101,11 @@ export function BooleanChart({ observations }: BooleanChartProps) {
       <div className="flex flex-wrap items-center gap-4 text-xs">
         <div className="flex items-center gap-2 text-muted-foreground">
           <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--success))]" />
-          <span>Negative (false)</span>
+          <span>{t('biomarkers.chartLegendNegative')}</span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--destructive))]" />
-          <span>Positive (true)</span>
+          <span>{t('biomarkers.chartLegendPositive')}</span>
         </div>
       </div>
     </div>

@@ -77,7 +77,7 @@ describe('Settings', () => {
     const profileLink = screen
       .getAllByRole('link', { name: 'Profile' })
       .find((link) => link.getAttribute('href') === '/settings/profile' && link.className.includes('rounded-lg'));
-    expect(profileLink).toBeDefined();
+    if (!profileLink) throw new Error('Sidebar link "Profile" with href "/settings/profile" and class "rounded-lg" not found');
     expect(profileLink).toHaveClass('bg-secondary', 'text-foreground');
   });
 

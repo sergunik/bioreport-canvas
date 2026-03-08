@@ -16,20 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { diagnosticReportService } from '@/api';
-
-function formatDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
-}
+import { formatDate } from '@/lib/date';
 
 function formatObservationValue(value: number | boolean | string): string {
   if (typeof value === 'boolean') {
@@ -111,9 +98,9 @@ export default function DiagnosticReportDetail() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">{displayTitle}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Created {formatDate(report.created_at)}
+            Created {formatDate(report.created_at, { pattern: 'datetime' })}
             {report.updated_at !== report.created_at &&
-              ` · Updated ${formatDate(report.updated_at)}`}
+              ` · Updated ${formatDate(report.updated_at, { pattern: 'datetime' })}`}
           </p>
         </div>
 

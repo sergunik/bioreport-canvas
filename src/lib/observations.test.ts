@@ -69,4 +69,24 @@ describe('groupObservationsByBiomarkerCode', () => {
     ];
     expect(groupObservationsByBiomarkerCode(data)).toEqual({});
   });
+
+  it('handles reserved prototype keys from API safely (no prototype collision)', () => {
+    const data: ObservationResource[] = [
+      obs({ id: 1, biomarker_code: '__proto__', created_at: '2025-01-02T00:00:00Z' }),
+      obs({ id: 2, biomarker_code: '__proto__', created_at: '2025-01-01T00:00:00Z' }),
+      obs({ id: 3, biomarker_code: '718-7', created_at: '2025-01-01T00:00:00Z' }),
+    ];
+    const result = groupObservationsByBiomarkerCode(data);
+    expect(Object.keys(result)).toContain('__proto__');
+    expect(Object.keys(result)).toContain('718-7');
+    expect(Object.keys(result)).toHaveLength(2);
+    expect(result['__proto__']).toHaveLength(2);
+    expect(result['__proto__'].map((o) => o.id)).toEqual([2, 1]);
+    expect(result['__proto__'].map((o) => o.created_at)).toEqual([
+      '2025-01-01T00:00:00Z',
+      '2025-01-02T00:00:00Z',
+    ]);
+    expect(result['718-7']).toHaveLength(1);
+    expect(result['718-7'][0].id).toBe(3);
+  });
 });

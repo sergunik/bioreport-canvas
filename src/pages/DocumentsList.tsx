@@ -20,18 +20,7 @@ import { documentService } from '@/api';
 import type { DocumentJobStatus } from '@/types/api';
 import { cn } from '@/lib/utils';
 import DocumentUploadCard from '@/components/DocumentUploadCard';
-
-function formatDate(iso: string) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) {
-    return iso;
-  }
-  return date.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-}
+import { formatDate } from '@/lib/date';
 
 function formatSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);

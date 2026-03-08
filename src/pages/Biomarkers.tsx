@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { MainLayout, PageContainer } from '@/components/layout';
@@ -35,6 +35,11 @@ export default function Biomarkers() {
     const pageCodes = codes.slice(start, start + PER_PAGE);
     return { groups, codes, totalPages, pageCodes, safePage };
   }, [data, page]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(codes.length / PER_PAGE));
+    if (page > maxPage) setPage(maxPage);
+  }, [codes.length, page]);
 
   const currentPage = safePage;
 

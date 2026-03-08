@@ -7,9 +7,10 @@ import {
   Tooltip,
   ReferenceArea,
 } from 'recharts';
-import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import type { ObservationResource } from '@/types/api';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { formatDate } from '@/lib/date';
 
 interface NumericChartProps {
   observations: ObservationResource[];
@@ -28,12 +29,13 @@ function toChartPoint(obs: ObservationResource, index: number) {
 }
 
 export function NumericChart({ observations, unit }: NumericChartProps) {
+  const { t } = useTranslation();
   const data = observations.map((o, i) => toChartPoint(o, i));
   const hasMultiple = data.length > 1;
 
   const chartConfig = {
-    value: { label: 'Value' },
-    created_at: { label: 'Date' },
+    value: { label: t('biomarkers.value') },
+    created_at: { label: t('biomarkers.date') },
   };
 
   return (
@@ -42,7 +44,7 @@ export function NumericChart({ observations, unit }: NumericChartProps) {
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="index"
-            tickFormatter={(i) => (data[i] ? format(new Date(data[i].created_at), 'MMM d') : '')}
+            tickFormatter={(i) => (data[i] ? formatDate(data[i].created_at, { fallback: '', pattern: 'dateShort' }) : '')}
             axisLine={false}
             tickLine={false}
           />
@@ -56,10 +58,10 @@ export function NumericChart({ observations, unit }: NumericChartProps) {
           <Tooltip
             content={
               <ChartTooltipContent
-                formatter={(value) => [unit ? `${value} ${unit}` : String(value), 'Value']}
+                formatter={(value) => [unit ? `${value} ${unit}` : String(value), t('biomarkers.value')]}
                 labelFormatter={(_, payload) =>
                   payload?.[0]?.payload?.created_at
-                    ? format(new Date(payload[0].payload.created_at), 'MMM d, yyyy')
+                    ? formatDate(payload[0].payload.created_at, { fallback: '' })
                     : ''
                 }
               />

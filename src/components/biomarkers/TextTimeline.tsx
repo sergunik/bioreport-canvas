@@ -1,5 +1,5 @@
-import { format } from 'date-fns';
 import type { ObservationResource } from '@/types/api';
+import { formatDate } from '@/lib/date';
 
 interface TextTimelineProps {
   observations: ObservationResource[];
@@ -15,7 +15,7 @@ export function TextTimeline({ observations }: TextTimelineProps) {
         >
           <span className="text-foreground">{String(obs.value)}</span>
           <span className="shrink-0 text-xs text-muted-foreground">
-            {format(new Date(obs.created_at), 'MMM d, yyyy')}
+            {formatDate(obs.created_at, { fallback: '' })}
           </span>
         </div>
       ))}
